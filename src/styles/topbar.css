@@ -1,0 +1,299 @@
+/* ── TOP BAR ──────────────────────────────────────── */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+  padding: 0 14px;
+  background: linear-gradient(180deg, var(--bg) 60%, transparent);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.top-bar > * {
+  pointer-events: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.logo-mark {
+  opacity: 0.5;
+}
+
+.logo-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── TIMELINE BAR (range scrubber) ────────────────── */
+.timeline-wrap {
+  flex: 1;
+  height: 36px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 0 7px;
+  position: relative;
+  gap: 0;
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tl-track {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tl-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 8px 0;
+  pointer-events: none;
+}
+
+.tl-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 1px;
+  min-width: 2px;
+  transition: background 0.15s;
+}
+
+.tl-bar.in-range {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tl-bar.hl {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.tl-range-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.tl-range-overlay.left {
+  left: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+.tl-range-overlay.right {
+  right: 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.tl-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  z-index: 4;
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tl-handle::after {
+  content: '';
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.15s;
+}
+
+.tl-handle:hover::after,
+.tl-handle.active::after {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.tl-handle.left {
+  transform: translateX(-50%);
+}
+
+.tl-handle.right {
+  transform: translateX(-50%);
+}
+
+.tl-range-label {
+  position: absolute;
+  bottom: -18px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: var(--font);
+  transform: translateX(-50%);
+  left: 50%;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tl-handle:hover .tl-range-label,
+.tl-handle.active .tl-range-label {
+  opacity: 1;
+}
+
+body.tl-dragging,
+body.tl-dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.tl-cursor, .tl-thumb, .tl-year-label {
+  display: none;
+}
+
+/* ── CONTROLS (search, clear) ── */
+.search-box {
+  height: 30px;
+  width: 100%;
+  padding: 0 28px 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  font: 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-box:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.search-box::placeholder {
+  color: var(--text-muted);
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-wrap .search-box {
+  width: 100%;
+  margin: 0;
+  flex: none;
+}
+
+.search-clear {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: color 0.15s;
+}
+
+.search-clear:hover {
+  color: var(--text-primary);
+}
+
+.search-clear.visible {
+  display: flex;
+}
+
+/* ── SEARCH RESULTS PANEL ────────────────────────── */
+.search-results {
+  position: fixed;
+  top: 54px;
+  right: 14px;
+  width: 380px;
+  max-height: calc(100vh - 120px);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  z-index: 180;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+.search-results.open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.sr-browse-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+
+.sr-browse-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.sr-body {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}

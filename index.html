@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OSTALGIE</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <script src="/locations_data.js"></script>
+  <script src="/tracks_data.js"></script>
+  <script src="/stations_data.js"></script>
+  <script src="https://www.youtube.com/iframe_api" async></script>
+</head>
+
+<body>
+
+  <!-- Tooltip -->
+  <div class="tooltip" id="tooltip">
+    <div class="tooltip-pill">
+      <img class="tooltip-art" id="ttArt" style="display:none" alt="">
+      <div class="tooltip-text">
+        <div class="tooltip-title" id="ttTitle"></div>
+        <div class="tooltip-sub" id="ttSub"></div>
+      </div>
+    </div>
+    <div class="tooltip-arrow"></div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="detail-panel" id="detailPanel">
+    <button class="detail-close icon-close-btn" id="detailClose"></button>
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- Stations Panel -->
+  <div class="sector-panel" id="sectorPanel">
+    <div class="sector-panel-title">Genre Stations</div>
+    <input type="text" class="sector-search-input" id="sectorSearchInput" placeholder="Search stations..."
+      autocomplete="off">
+    <div class="sector-list" id="sectorList"></div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="logo" id="logoBtn" title="Reset Camera to Global Orbit">
+      <svg class="logo-mark" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1" />
+        <circle cx="12" cy="12" r="2" fill="currentColor" />
+        <line x1="12" y1="1.5" x2="12" y2="7" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
+        <line x1="12" y1="17" x2="12" y2="22.5" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
+        <line x1="1.5" y1="12" x2="7" y2="12" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
+        <line x1="17" y1="12" x2="22.5" y2="12" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
+      </svg>
+      <span class="logo-text" id="headerTitle">OSTALGIE</span>
+    </div>
+
+    <div class="timeline-wrap" id="timelineWrap">
+      <div class="tl-track" id="tlTrack">
+        <div class="tl-bars" id="tlBars"></div>
+        <div class="tl-range-overlay left" id="tlOverlayL" style="width:0%"></div>
+        <div class="tl-range-overlay right" id="tlOverlayR" style="width:0%"></div>
+        <div class="tl-handle left" id="tlHandleL" style="left:0%">
+          <div class="tl-range-label" id="tlLabelL">1967</div>
+        </div>
+        <div class="tl-handle right" id="tlHandleR" style="left:100%">
+          <div class="tl-range-label" id="tlLabelR">2005</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" class="search-box" id="searchInput" placeholder="Search..." autocomplete="off">
+      <button class="search-clear" id="searchClear" type="button" aria-label="Clear search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M10 10l4 4m0-4l-4 4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Search Results Dropdown -->
+    <div class="search-results" id="searchResults">
+      <div class="sr-browse-bar" id="srBrowseBar">
+        <span class="sr-browse-count" id="srBrowseCount">1080 tracks</span>
+      </div>
+      <div class="sr-body" id="srBody"></div>
+    </div>
+
+    <!-- Replaced Tour button with Stations button -->
+    <button class="sector-btn" id="sectorBtn" title="Manage Stations"><span class="btn-icon sector-btn-icon"></span>
+      Stations</button>
+    <button class="info-btn" id="infoBtn" title="Info & Controls"></button>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="info-panel" id="infoPanel">
+    <button class="info-panel-close icon-close-btn" id="infoPanelClose"></button>
+
+    <div class="info-panel-header">
+      <div class="info-panel-title">CONTROLS &amp; HOTKEYS</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="info-tab-content" id="viewInfoControls">
+      <p style="color:var(--text-muted);margin-bottom:6px">Hover to preview, click a hub or track to focus. Drag to orbit,
+        scroll to zoom.</p>
+      <div class="info-controls">
+        <div class="info-ctrl-row" id="ctrlAutopilot">
+          <div class="info-ctrl-check on" id="checkAutopilot"></div>
+          <span class="info-ctrl-label">Auto-pilot</span>
+          <span class="info-ctrl-key">Enter</span>
+        </div>
+        <div class="info-ctrl-row" id="ctrlBorders">
+          <div class="info-ctrl-check on" id="checkBorders"></div>
+          <span class="info-ctrl-label">Country borders</span>
+          <span class="info-ctrl-key">B</span>
+        </div>
+        <div class="info-ctrl-row" id="ctrlStarfield">
+          <div class="info-ctrl-check on" id="checkStarfield"></div>
+          <span class="info-ctrl-label">Starfield</span>
+          <span class="info-ctrl-key">G</span>
+        </div>
+        <div class="info-ctrl-row" id="ctrlSounds">
+          <div class="info-ctrl-check on" id="checkSounds"></div>
+          <span class="info-ctrl-label">UI sounds</span>
+          <span class="info-ctrl-key">S</span>
+        </div>
+        <div class="info-ctrl-row" id="ctrlResetCam">
+          <div class="info-ctrl-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4" />
+              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+            </svg>
+          </div>
+          <span class="info-ctrl-label">Reset camera</span>
+          <span class="info-ctrl-key">V</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;color:var(--text-muted)">1,080 tracks
+        curated across 79 historical hubs.</p>
+    </div>
+  </div>
+
+  <!-- Bottom Stats Pills -->
+  <div class="bottom-bar">
+    <div class="stat"><span class="stat-label">Tracks</span><span class="stat-value" id="hudTracks">1,080</span></div>
+    <div class="stat"><span class="stat-label">Artists</span><span class="stat-value" id="hudArtists">640</span></div>
+    <div class="stat"><span class="stat-label">Span</span><span class="stat-value" id="statYears">1967–2005</span></div>
+  </div>
+
+  <!-- Bottom Player Bar -->
+  <div class="player-bar">
+    <div class="player-left" id="playerLeft">
+      <div class="player-art-placeholder" id="playerArt"></div>
+      <div class="player-info">
+        <div class="player-title" id="playerTitle">No track selected</div>
+        <div class="player-artist" id="playerArtist"><span id="playerArtistText">Click a node to play</span></div>
+      </div>
+    </div>
+    <button class="p-btn" id="pPrev" title="Previous"></button>
+    <button class="p-btn main" id="pToggle" title="Play"></button>
+    <button class="p-btn" id="pNext" title="Next"></button>
+    <div class="vol-wrap" id="volWrap">
+      <button class="p-btn" id="volBtn" title="Volume"></button>
+      <div class="vol-popup" id="volPopup">
+        <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="50">
+        <div class="vol-pct" id="volPct">50%</div>
+      </div>
+    </div>
+    <div class="player-progress" id="pProgress">
+      <div class="player-progress-bar" id="pBar">
+        <div class="player-progress-ghost" id="pGhost"></div>
+        <div class="player-progress-fill" id="pFill"></div>
+        <div class="player-progress-livedot" id="pLiveDot"></div>
+        <div class="player-progress-livetime" id="pLiveTime">0:00</div>
+        <div class="player-progress-tooltip" id="pTooltip">0:00</div>
+        <div class="player-progress-hitarea" id="pHitarea"></div>
+      </div>
+      <div class="player-time"><span id="pTime">0:00</span><span id="pDur">0:00</span></div>
+    </div>
+    <button class="shuffle-btn" id="shuffleBtn" title="Shuffle"></button>
+  </div>
+
+  <!-- Hidden YouTube player container -->
+  <div id="yt-player-wrap"
+    style="position:fixed;bottom:0;left:0;width:200px;height:200px;opacity:0.001;pointer-events:none;z-index:-10;">
+    <div id="yt-frame"></div>
+  </div>
+
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
