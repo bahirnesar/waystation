@@ -1,6 +1,7 @@
 import { ICON_EXTERNAL_LINK, ICON_MUSIC, ICON_BROADCAST, ICON_NOTE_SM, ICON_USER_SM } from './icons';
 import { escapeHtml, standardizeCountry, getDisplayCountry, trackMap } from '../data/store';
 import { getTrackRecommendations } from '../data/recommendations';
+import { getTrackGenres } from '../data/genres';
 import { sfx } from '../audio/sfx';
 import { Track, Cluster, Station } from '../types/index';
 
@@ -50,6 +51,10 @@ class UIPanels {
 
   onSelectTrack: ((track: Track) => void) | null = null;
   onSelectStation: ((sid: string) => void) | null = null;
+  onToggleAutopilot?: () => boolean;
+  onToggleBorders?: () => boolean;
+  onToggleStarfield?: () => boolean;
+  onToggleSounds?: () => boolean;
   currentTooltipTrackId: string | null = null;
 
   init(options: UIPanelsInitOptions): void {
@@ -92,6 +97,10 @@ class UIPanels {
 
   bindEvents(opts: UIPanelsInitOptions): void {
     const { stations, currentStationId, onSelectStation, onSearchChange, onToggleAutopilot, onToggleBorders, onToggleStarfield, onToggleSounds, onResetCam } = opts;
+    this.onToggleAutopilot = onToggleAutopilot;
+    this.onToggleBorders = onToggleBorders;
+    this.onToggleStarfield = onToggleStarfield;
+    this.onToggleSounds = onToggleSounds;
 
     document.getElementById('detailClose')?.addEventListener('click', () => this.closeDetailPanel());
 
@@ -171,17 +180,20 @@ class UIPanels {
       this.infoPanel?.classList.remove('open');
     });
 
-    const toggles: Array<[string, string, (() => boolean) | undefined, HTMLElement | null]> = [
-      ['ctrlAutopilot', 'switch', onToggleAutopilot, this.checkAutopilot],
-      ['ctrlBorders', 'switch', onToggleBorders, this.checkBorders],
-      ['ctrlStarfield', 'switch', onToggleStarfield, this.checkStarfield],
-      ['ctrlSounds', '', onToggleSounds, this.checkSounds],
-    ];
-    toggles.forEach(([id, sfxName, fn, checkEl]) => {
-      document.getElementById(id)?.addEventListener('click', () => {
-        if (sfxName) sfx.play(sfxName as any);
-        if (fn && checkEl) checkEl.classList.toggle('on', fn());
-      });
+    document.getElementById('ctrlAutopilot')?.addEventListener('click', () => {
+      sfx.play('switch');
+      if (this.onToggleAutopilot && this.checkAutopilot) {
+        this.checkAutopilot.classList.toggle('on', this.onToggleAutopilot());
+      }
+    });
+    document.getElementById('ctrlBorders')?.addEventListener('click', () => {
+      this.toggleBorders();
+    });
+    document.getElementById('ctrlStarfield')?.addEventListener('click', () => {
+      this.toggleStarfield();
+    });
+    document.getElementById('ctrlSounds')?.addEventListener('click', () => {
+      this.toggleSounds();
     });
 
     document.getElementById('ctrlResetCam')?.addEventListener('click', () => {
@@ -217,6 +229,35 @@ class UIPanels {
 
   setAutopilot(active: boolean): void {
     this.checkAutopilot?.classList.toggle('on', active);
+  }
+
+  toggleBorders(): boolean {
+    if (this.onToggleBorders && this.checkBorders) {
+      sfx.play('switch');
+      const state = this.onToggleBorders();
+      this.checkBorders.classList.toggle('on', state);
+      return state;
+    }
+    return false;
+  }
+
+  toggleStarfield(): boolean {
+    if (this.onToggleStarfield && this.checkStarfield) {
+      sfx.play('switch');
+      const state = this.onToggleStarfield();
+      this.checkStarfield.classList.toggle('on', state);
+      return state;
+    }
+    return false;
+  }
+
+  toggleSounds(): boolean {
+    if (this.onToggleSounds && this.checkSounds) {
+      const state = this.onToggleSounds();
+      this.checkSounds.classList.toggle('on', state);
+      return state;
+    }
+    return false;
   }
 
   updateFilteredStats(visibleTracks: Track[]): void {
@@ -298,9 +339,11 @@ class UIPanels {
     const artistText = escapeHtml(t.artist || '');
     const titleText = escapeHtml(t.title || '');
     const labelHtml = showArtist && t.artist
-      ? `<span style="color:var(--text-primary);font-weight:500;">${artistText}</span> <span style="color:var(--text-muted);margin:0 3px;">\u2014</span> <span>${titleText}</span>`
-      : `<span>${titleText}</span>`;
-    const tooltip = showArtist && t.artist ? `${t.artist} \u2014 ${t.title}` : (t.title || '');
+      ? `<span style="color:var(--text-primary);font-weight:500;">${titleText}</span> <span style="color:var(--text-muted);margin:0 3px;">\u2014</span> <span style="color:var(--text-muted);">${artistText}</span>`
+      : `<span style="color:var(--text-primary);font-weight:500;">${titleText}</span>`;
+    const displayLoc = getDisplayCountry(t) || standardizeCountry(t.country || t.city) || '';
+    const locSuffix = displayLoc ? ` (${displayLoc})` : '';
+    const tooltip = showArtist && t.artist ? `${t.title} \u2014 ${t.artist}${locSuffix}` : `${t.title || ''}${locSuffix}`;
 
     return `
       <div class="detail-track-item" data-id="${t.id}">
@@ -323,27 +366,41 @@ class UIPanels {
     if (onSelectTrack) this.onSelectTrack = onSelectTrack;
     this.currentDetailTrackId = track.id;
 
-    const { countryName, artistTracks, locationTracks, genreTracks } = getTrackRecommendations(track, allTracks, allClusters);
+    const {
+      countryName,
+      artistTracks,
+      genreSections,
+      locationTracks
+    } = getTrackRecommendations(track, allTracks, allClusters);
 
     const buildSection = (title: string, list: Track[], showArtist: boolean) => !list.length ? '' : `
       <div class="detail-divider"></div>
-      <div class="detail-section-title">${title} (${list.length})</div>
+      <div class="detail-section-title">${title}</div>
       <div class="detail-tracks-list">${list.map(t => this.renderDetailTrackItem(t, showArtist)).join('')}</div>
     `;
 
     let recoSectionsHtml = buildSection(`More from ${escapeHtml(track.artist)}`, artistTracks, false);
 
-    if (genreTracks.length > 0) {
-      const genreTitle = track.genre ? `More ${escapeHtml(track.genre)} from ${escapeHtml(countryName)}` : `More from ${escapeHtml(countryName)}`;
-      recoSectionsHtml += buildSection(genreTitle, genreTracks, true);
-    } else if (locationTracks.length > 0) {
-      recoSectionsHtml += buildSection(`More from ${escapeHtml(countryName)}`, locationTracks, true);
-    } else if (!artistTracks.length) {
+    if (genreSections && genreSections.length > 0) {
+      for (const sec of genreSections) {
+        const genreTitle = `More ${escapeHtml(sec.genre)}`;
+        recoSectionsHtml += buildSection(genreTitle, sec.tracks, true);
+      }
+    }
+
+    if (locationTracks.length > 0) {
+      recoSectionsHtml += buildSection('More Tracks', locationTracks, true);
+    } else if (!artistTracks.length && (!genreSections || !genreSections.length)) {
       recoSectionsHtml += `
         <div class="detail-divider"></div>
         <div style="font-size:11px;color:var(--text-muted);padding:8px 0;text-align:center;">Sole archive track for this artist &amp; region</div>
       `;
     }
+
+    const trackGenres = getTrackGenres(track);
+    const genreBadgesHtml = trackGenres
+      .map(g => `<span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${escapeHtml(g)}</span>`)
+      .join('');
 
     const linkUrl = track.id ? `https://www.youtube.com/watch?v=${track.id}` : '#';
 
@@ -357,7 +414,7 @@ class UIPanels {
             <div class="detail-meta">
               <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${escapeHtml(countryName)}</span>
               <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${track.year}</span>
-              <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${escapeHtml(track.genre)}</span>
+              ${genreBadgesHtml}
             </div>
             <div style="display:flex;align-items:center;margin-top:6px;gap:6px;">
               <a class="detail-sc-link" href="${linkUrl}" target="_blank" rel="noopener">YouTube ${ICON_EXTERNAL_LINK}</a>

@@ -465,7 +465,7 @@ class GlobeScene {
       dotColors[i3 + 1] = 0.98;
       dotColors[i3 + 2] = 1.0;
 
-      dotSizes[i] = 3.6;
+      dotSizes[i] = 3.8;
       dotAlphas[i] = 0.85;
       dotPhases[i] = Math.random() * Math.PI * 2.0;
     }
@@ -537,10 +537,11 @@ class GlobeScene {
           float d = length(coord);
           if (d > 0.5) discard;
 
-          float core = 1.0 - smoothstep(0.12, 0.48, d);
-          float halo = exp(-d * 4.8) * vHorizon * (0.35 + 0.50 * vTwinkle);
+          // Diffused edge falloff matching the music project
+          float diffused = 1.0 - smoothstep(0.0, 0.5, d);
+          float halo = pow(diffused, 1.5) * vHorizon * (0.35 + 0.50 * vTwinkle);
 
-          float finalAlpha = clamp(core + halo, 0.0, 1.0) * vAlpha;
+          float finalAlpha = clamp(diffused + halo * 0.4, 0.0, 1.0) * vAlpha;
           vec3 finalColor = vColor + vec3(0.28, 0.58, 0.96) * (vHorizon * halo);
 
           gl_FragColor = vec4(finalColor, finalAlpha);

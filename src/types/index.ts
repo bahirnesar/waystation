@@ -4,6 +4,7 @@ export interface Track {
   artist: string;
   year: number;
   genre: string;
+  genres?: string[];
   city: string;
   country: string;
   lat: number;
@@ -50,11 +51,21 @@ export interface AppState {
   autoSpin: boolean;
 }
 
+export interface GenreRecommendationSection {
+  genre: string;
+  locDisplay: string;
+  tracks: Track[];
+  hasWiderRegion?: boolean;
+}
+
 export interface TrackRecommendations {
   countryName: string;
   artistTracks: Track[];
+  genreSections: GenreRecommendationSection[];
   locationTracks: Track[];
-  genreTracks: Track[];
+  genreTracks?: Track[];
+  genreHasWiderRegion?: boolean;
+  locationHasWiderRegion?: boolean;
 }
 
 export interface RangeChangeEvent {

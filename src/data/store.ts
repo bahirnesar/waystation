@@ -1,5 +1,6 @@
 // ─── DATA STORE & NORMALIZATION ───
 import { Track, Cluster, Station, AppState, LocationHub } from '../types/index';
+import { getTrackGenres } from './genres';
 
 // Raw inputs from window globals
 const rawLocations: LocationHub[] = window.LOCATIONS_DATA || [];
@@ -101,6 +102,7 @@ allTracks.forEach(t => {
   }
   if (t.country) t.country = standardizeCountry(t.country);
   t.displayCountry = getDisplayCountry(t);
+  t.genres = getTrackGenres(t);
 });
 
 // Hydrate clusters
@@ -189,12 +191,14 @@ function min(a: number, b: number): number {
 
 export function trackMatchesSearch(t: Track, query: string): boolean {
   if (!query) return true;
-  return t.title.toLowerCase().includes(query) ||
-    t.artist.toLowerCase().includes(query) ||
-    t.city.toLowerCase().includes(query) ||
-    t.country.toLowerCase().includes(query) ||
-    (t.displayCountry ? t.displayCountry.toLowerCase().includes(query) : false) ||
-    t.genre.toLowerCase().includes(query);
+  const q = query.toLowerCase();
+  return t.title.toLowerCase().includes(q) ||
+    t.artist.toLowerCase().includes(q) ||
+    t.city.toLowerCase().includes(q) ||
+    t.country.toLowerCase().includes(q) ||
+    (t.displayCountry ? t.displayCountry.toLowerCase().includes(q) : false) ||
+    t.genre.toLowerCase().includes(q) ||
+    (t.genres ? t.genres.some(g => g.toLowerCase().includes(q)) : false);
 }
 
 // 5. Hydrate stations from trackIds

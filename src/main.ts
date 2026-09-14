@@ -90,7 +90,10 @@ controls.init({
   onTogglePlayPause: () => player.togglePlayPause(),
   onSkipNext: () => player.skipNext(),
   onSkipPrev: () => player.skipPrev(),
-  onCloseAllPanels: () => panels.closeAllPanels()
+  onCloseAllPanels: () => panels.closeAllPanels(),
+  onToggleBorders: () => panels.toggleBorders(),
+  onToggleStarfield: () => panels.toggleStarfield(),
+  onToggleSounds: () => panels.toggleSounds()
 });
 
 controls.onResetCam = () => {

@@ -13,6 +13,9 @@ export interface SceneControlsInitOptions {
   onSkipNext?: () => void;
   onSkipPrev?: () => void;
   onCloseAllPanels?: () => void;
+  onToggleBorders?: () => void;
+  onToggleStarfield?: () => void;
+  onToggleSounds?: () => void;
 }
 
 interface GestureEvent extends UIEvent {
@@ -72,7 +75,10 @@ class SceneControls {
     onTogglePlayPause,
     onSkipNext,
     onSkipPrev,
-    onCloseAllPanels
+    onCloseAllPanels,
+    onToggleBorders,
+    onToggleStarfield,
+    onToggleSounds
   }: SceneControlsInitOptions): void {
     this.camera = camera;
     this.globeGroup = globeGroup;
@@ -87,7 +93,10 @@ class SceneControls {
       onTogglePlayPause,
       onSkipNext,
       onSkipPrev,
-      onCloseAllPanels
+      onCloseAllPanels,
+      onToggleBorders,
+      onToggleStarfield,
+      onToggleSounds
     });
 
     const logoBtn = document.getElementById('logoBtn');
@@ -294,12 +303,18 @@ class SceneControls {
     onTogglePlayPause,
     onSkipNext,
     onSkipPrev,
-    onCloseAllPanels
+    onCloseAllPanels,
+    onToggleBorders,
+    onToggleStarfield,
+    onToggleSounds
   }: {
     onTogglePlayPause?: () => void;
     onSkipNext?: () => void;
     onSkipPrev?: () => void;
     onCloseAllPanels?: () => void;
+    onToggleBorders?: () => void;
+    onToggleStarfield?: () => void;
+    onToggleSounds?: () => void;
   }): void {
     window.addEventListener('keydown', e => {
       const target = e.target as HTMLElement | null;
@@ -317,6 +332,12 @@ class SceneControls {
         if (this.onAutopilotChange) {
           this.onAutopilotChange();
         }
+      } else if (e.key === 'b' || e.key === 'B') {
+        if (onToggleBorders) onToggleBorders();
+      } else if (e.key === 'n' || e.key === 'N') {
+        if (onToggleStarfield) onToggleStarfield();
+      } else if (e.key === 'm' || e.key === 'M') {
+        if (onToggleSounds) onToggleSounds();
       } else if (e.key === 'v' || e.key === 'V') {
         this.resetCamera();
       } else if (e.code === 'Escape') {
