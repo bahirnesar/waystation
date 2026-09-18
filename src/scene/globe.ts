@@ -37,7 +37,7 @@ class GlobeScene {
   starMat: THREE.ShaderMaterial | null = null;
   innerAtmosMesh: THREE.Mesh | null = null;
   outerAtmosMesh: THREE.Mesh | null = null;
-  bordersMesh: THREE.LineSegments | null = null;
+  bordersMesh: THREE.Mesh | null = null;
 
   allTracks: Track[] = [];
   N: number = 0;
@@ -388,45 +388,49 @@ class GlobeScene {
       if (!res.ok) return;
       const lines: [number, number][][] = await res.json();
 
-      let segmentCount = 0;
-      for (let i = 0; i < lines.length; i++) {
-        segmentCount += Math.max(0, lines[i].length - 1);
-      }
+      const width = 4096;
+      const height = 2048;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-      const positions = new Float32Array(segmentCount * 6);
-      const radius = GLOBE_RADIUS + 0.35;
-      const DEG2RAD = Math.PI / 180;
-      let posIdx = 0;
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = '#283444';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
+      const scaleX = width / 360;
+      const scaleY = height / 180;
+
+      ctx.beginPath();
       for (let r = 0; r < lines.length; r++) {
         const ring = lines[r];
-        for (let i = 0; i < ring.length - 1; i++) {
-          const lat1 = ring[i][1];
-          const lng1 = ring[i][0];
-          const phi1 = (90 - lat1) * DEG2RAD;
-          const theta1 = (lng1 + 180) * DEG2RAD;
-          positions[posIdx++] = -(radius * Math.sin(phi1) * Math.cos(theta1));
-          positions[posIdx++] = radius * Math.cos(phi1);
-          positions[posIdx++] = radius * Math.sin(phi1) * Math.sin(theta1);
-
-          const lat2 = ring[i + 1][1];
-          const lng2 = ring[i + 1][0];
-          const phi2 = (90 - lat2) * DEG2RAD;
-          const theta2 = (lng2 + 180) * DEG2RAD;
-          positions[posIdx++] = -(radius * Math.sin(phi2) * Math.cos(theta2));
-          positions[posIdx++] = radius * Math.cos(phi2);
-          positions[posIdx++] = radius * Math.sin(phi2) * Math.sin(theta2);
+        if (ring.length < 2) continue;
+        ctx.moveTo((ring[0][0] + 180) * scaleX, (90 - ring[0][1]) * scaleY);
+        for (let i = 1; i < ring.length; i++) {
+          ctx.lineTo((ring[i][0] + 180) * scaleX, (90 - ring[i][1]) * scaleY);
         }
       }
+      ctx.stroke();
 
-      const geom = new THREE.BufferGeometry();
-      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const mat = new THREE.LineBasicMaterial({
-        color: 0x4a5568,
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
+
+      const geom = new THREE.SphereGeometry(GLOBE_RADIUS + 0.15, 64, 64);
+      const mat = new THREE.MeshBasicMaterial({
+        map: texture,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.45,
+        depthWrite: false
       });
-      this.bordersMesh = new THREE.LineSegments(geom, mat);
+      this.bordersMesh = new THREE.Mesh(geom, mat);
       this.globeGroup.add(this.bordersMesh);
     } catch { }
   }
@@ -794,7 +798,15 @@ class GlobeScene {
     }
     if (this.bordersMesh) {
       this.bordersMesh.geometry.dispose();
-      (this.bordersMesh.material as THREE.Material).dispose();
+      const mat = this.bordersMesh.material;
+      if (Array.isArray(mat)) {
+        mat.forEach(m => m.dispose());
+      } else {
+        if ('map' in mat && mat.map) {
+          (mat.map as THREE.Texture).dispose();
+        }
+        mat.dispose();
+      }
     }
     if (this.hoverRing) {
       this.hoverRing.geometry.dispose();
