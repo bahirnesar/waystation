@@ -12,6 +12,8 @@ import { panels } from './ui/panels';
 import { initIcons } from './ui/icons';
 import { Track } from './types/index';
 
+const initStartTime = performance.now();
+
 // 1. Initialize Icons
 initIcons();
 
@@ -198,7 +200,33 @@ function animate(): void {
   globe.render(elapsed);
 }
 
+function dismissLoadingScreen(): void {
+  const loader = document.getElementById('loading-screen');
+  if (!loader) return;
+
+  const minDisplayTime = 400;
+  const elapsed = performance.now() - initStartTime;
+  const delay = Math.max(0, minDisplayTime - elapsed);
+
+  setTimeout(() => {
+    loader.classList.add('fade-out');
+    loader.addEventListener('transitionend', () => {
+      loader.remove();
+    }, { once: true });
+    setTimeout(() => {
+      if (loader.parentNode) loader.remove();
+    }, 800);
+  }, delay);
+}
+
 animate();
+
+// Double requestAnimationFrame ensures the WebGL scene and UI have rendered before fading the loading screen
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    dismissLoadingScreen();
+  });
+});
 
 function cleanup(): void {
   if (animId !== null) {
