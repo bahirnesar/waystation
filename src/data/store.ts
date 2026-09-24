@@ -206,7 +206,6 @@ export const stations: Station[] = (rawStations.length ? rawStations : [
   {
     id: 'all',
     genre: 'All Tracks',
-    isDefault: true,
     trackIds: allTracks.map(t => t.id)
   }
 ]).map(s => {

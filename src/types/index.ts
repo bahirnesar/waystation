@@ -35,7 +35,6 @@ export interface Cluster extends LocationHub {
 export interface Station {
   id: string;
   genre: string;
-  isDefault?: boolean;
   trackIds?: string[];
   trackCount?: number;
   artistCount?: number;
@@ -53,9 +52,7 @@ export interface AppState {
 
 export interface GenreRecommendationSection {
   genre: string;
-  locDisplay: string;
   tracks: Track[];
-  hasWiderRegion?: boolean;
 }
 
 export interface TrackRecommendations {
@@ -63,14 +60,9 @@ export interface TrackRecommendations {
   artistTracks: Track[];
   genreSections: GenreRecommendationSection[];
   locationTracks: Track[];
-  genreTracks?: Track[];
-  genreHasWiderRegion?: boolean;
-  locationHasWiderRegion?: boolean;
 }
 
 export interface RangeChangeEvent {
-  rangeLeft: number;
-  rangeRight: number;
   rangeYearL: number;
   rangeYearR: number;
 }

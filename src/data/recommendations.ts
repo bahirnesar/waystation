@@ -257,7 +257,6 @@ export function getTrackRecommendations(
 
   for (const genre of trackGenres) {
     const matchingTracks: Track[] = [];
-    let sectionHasWiderRegion = false;
 
     // Exact country/location tracks first
     for (const t of exactLocationTracks) {
@@ -275,19 +274,12 @@ export function getTrackRecommendations(
         if (!seenRecoIds.has(t.id) && trackHasGenre(t, genre)) {
           seenRecoIds.add(t.id);
           matchingTracks.push(t);
-          sectionHasWiderRegion = true;
         }
       }
     }
 
     if (matchingTracks.length > 0) {
-      const locDisplay = sectionHasWiderRegion ? `${countryName} & Region` : countryName;
-      genreSections.push({
-        genre,
-        locDisplay,
-        tracks: matchingTracks,
-        hasWiderRegion: sectionHasWiderRegion
-      });
+      genreSections.push({ genre, tracks: matchingTracks });
     }
   }
 
@@ -295,7 +287,6 @@ export function getTrackRecommendations(
   // include 'More from location' track recommendations.
   const totalPreviousTracks = artistTracks.length + genreSections.reduce((acc, s) => acc + s.tracks.length, 0);
   const locationTracks: Track[] = [];
-  let locationHasWiderRegion = false;
 
   const MIN_RECOMMENDED_TOTAL = 10;
   if (totalPreviousTracks < MIN_RECOMMENDED_TOTAL) {
@@ -315,7 +306,6 @@ export function getTrackRecommendations(
         if (!seenRecoIds.has(t.id)) {
           seenRecoIds.add(t.id);
           locationTracks.push(t);
-          locationHasWiderRegion = true;
         }
       }
     }
@@ -325,9 +315,6 @@ export function getTrackRecommendations(
     countryName,
     artistTracks,
     genreSections,
-    locationTracks,
-    locationHasWiderRegion,
-    genreTracks: genreSections.flatMap(s => s.tracks),
-    genreHasWiderRegion: genreSections.some(s => s.hasWiderRegion)
+    locationTracks
   };
 }

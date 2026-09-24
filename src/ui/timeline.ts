@@ -115,8 +115,6 @@ class Timeline {
 
     if (this.onRangeChange) {
       this.onRangeChange({
-        rangeLeft: this.rangeLeft,
-        rangeRight: this.rangeRight,
         rangeYearL: this.rangeYearL,
         rangeYearR: this.rangeYearR
       });
