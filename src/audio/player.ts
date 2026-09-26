@@ -19,6 +19,7 @@ class AudioPlayer {
   queue: Track[] = [];
   queueIdx: number = 0;
   isShuffle: boolean = false;
+  history: Track[] = [];
 
   // Callbacks
   onTrackChange: ((track: Track) => void) | null = null;
@@ -200,7 +201,15 @@ class AudioPlayer {
     if (this.playerArtistText) this.playerArtistText.textContent = track.artist;
   }
 
-  playTrack(track: Track): void {
+  playTrack(track: Track, fromHistory: boolean = false): void {
+    if (!fromHistory && this.activeTrack && this.activeTrack.id !== track.id) {
+      this.history.push(this.activeTrack);
+      if (this.history.length > 100) this.history.shift();
+    }
+    // Keep queue position in sync so sequential skipping continues from here
+    const idx = this.queue.findIndex(t => t.id === track.id);
+    if (idx !== -1) this.queueIdx = idx;
+
     this.activeTrack = track;
     this.updateMetadata(track);
 
@@ -234,9 +243,18 @@ class AudioPlayer {
   }
 
   skipPrev(): void {
-    if (!this.queue.length) return;
-    this.queueIdx = (this.queueIdx - 1 + this.queue.length) % this.queue.length;
-    this.playTrack(this.queue[this.queueIdx]);
+    // Standard behaviour: if a few seconds in, restart the current track
+    const cur = this.ytPlayer && this.ytReady ? this.ytPlayer.getCurrentTime() || 0 : 0;
+    if (this.activeTrack && cur > 3) {
+      this.ytPlayer!.seekTo(0, true);
+      return;
+    }
+    const prev = this.history.pop();
+    if (prev) {
+      this.playTrack(prev, true);
+    } else if (this.activeTrack && this.ytPlayer && this.ytReady) {
+      this.ytPlayer.seekTo(0, true);
+    }
   }
 
   setQueue(tracks: Track[], startImmediate: boolean = false): void {
