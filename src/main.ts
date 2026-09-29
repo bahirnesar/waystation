@@ -125,7 +125,7 @@ function switchToStation(sid: string): void {
   // Update header title
   const headerTitle = document.getElementById('headerTitle');
   if (headerTitle) {
-    headerTitle.textContent = sid === 'all' ? 'OSTALGIE' : `OSTALGIE : ${station.genre.toUpperCase()}`;
+    headerTitle.textContent = sid === 'all' ? 'OSTALGIE' : `OSTALGIE : ${station.name.toUpperCase()}`;
   }
 
   // Reset timeline

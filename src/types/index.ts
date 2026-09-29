@@ -34,7 +34,7 @@ export interface Cluster extends LocationHub {
 
 export interface Station {
   id: string;
-  genre: string;
+  name: string;
   trackIds?: string[];
   trackCount?: number;
   artistCount?: number;

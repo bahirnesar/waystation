@@ -1,6 +1,6 @@
 // ─── DATA STORE & NORMALIZATION ───
 import { Track, Cluster, Station, AppState, LocationHub } from '../types/index';
-import { getTrackGenres } from './genres';
+import { TOP_LEVEL_GENRES, getTrackGenres, trackHasGenre } from './genres';
 
 // Raw inputs from window globals
 const rawLocations: LocationHub[] = window.LOCATIONS_DATA || [];
@@ -201,17 +201,14 @@ export function trackMatchesSearch(t: Track, query: string): boolean {
     (t.genres ? t.genres.some(g => g.toLowerCase().includes(q)) : false);
 }
 
-// 5. Hydrate stations from trackIds
+// 5. Hydrate stations (from explicit trackIds for custom stations, or derived by genre)
 export const stations: Station[] = (rawStations.length ? rawStations : [
-  {
-    id: 'all',
-    genre: 'All Tracks',
-    trackIds: allTracks.map(t => t.id)
-  }
+  { id: 'all', name: 'All Tracks' },
+  ...TOP_LEVEL_GENRES.map(name => ({ id: name.toLowerCase(), name }))
 ]).map(s => {
-  const stTracks = s.trackIds
+  const stTracks = s.trackIds?.length
     ? s.trackIds.map(id => trackMap.get(id)).filter((t): t is Track => Boolean(t))
-    : (s.tracks || (s.id === 'all' ? allTracks : []));
+    : (s.tracks || (s.id === 'all' ? allTracks : allTracks.filter(t => trackHasGenre(t, s.name))));
 
   const uniqueArtists = new Set(stTracks.map(t => (t.artist || '').trim().toLowerCase()));
 

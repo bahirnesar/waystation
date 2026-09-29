@@ -4,6 +4,7 @@ node_modules/
 # Production build outputs
 dist/
 dist-ssr/
+plan/
 
 # Local env files
 *.local
@@ -32,5 +33,3 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Project-specific
-todo.md

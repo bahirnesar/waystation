@@ -286,7 +286,7 @@ class UIPanels {
     if (!this.sectorList) return;
     const q = query.toLowerCase().trim();
 
-    const filtered = q ? stations.filter(s => s.genre && s.genre.toLowerCase().includes(q)) : stations;
+    const filtered = q ? stations.filter(s => s.name && s.name.toLowerCase().includes(q)) : stations;
 
     this.sectorList.innerHTML = filtered.map(s => {
       const tCount = s.tracks ? s.tracks.length : (s.trackCount || 0);
@@ -297,7 +297,7 @@ class UIPanels {
         <div class="sector-item${activeClass}" data-sid="${s.id}">
           <div class="sector-item-top">
             <div class="sector-item-icon">${ICON_BROADCAST}</div>
-            <span class="sector-item-name">${s.genre}</span>
+            <span class="sector-item-name">${s.name}</span>
           </div>
           <div class="sector-item-bottom">
             <div class="sector-item-badges">
