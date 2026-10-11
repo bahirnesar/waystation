@@ -41,144 +41,47 @@
   white-space: nowrap;
 }
 
-/* ── TIMELINE BAR (range scrubber) ────────────────── */
-.timeline-wrap {
-  flex: 1;
-  height: 36px;
-  min-width: 0;
+/* ── NAV STATS (Tracks & Artists) ─────────────────── */
+.nav-stats {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
+  gap: 12px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
   border: 1px solid var(--border);
-  padding: 0 7px;
-  position: relative;
-  gap: 0;
-  overflow: visible;
+  background: var(--bg-surface);
   user-select: none;
   -webkit-user-select: none;
+  flex-shrink: 0;
 }
 
-.tl-track {
-  flex: 1;
-  height: 100%;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.tl-bars {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  gap: 1px;
-  padding: 8px 0;
-  pointer-events: none;
-}
-
-.tl-bar {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 1px;
-  min-width: 2px;
-  transition: background 0.15s;
-}
-
-.tl-bar.in-range {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.tl-bar.hl {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.tl-range-overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.tl-range-overlay.left {
-  left: 0;
-  border-radius: 8px 0 0 8px;
-}
-
-.tl-range-overlay.right {
-  right: 0;
-  border-radius: 0 8px 8px 0;
-}
-
-.tl-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 14px;
-  z-index: 4;
-  cursor: ew-resize;
-  display: flex;
+.nav-stat {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.tl-handle::after {
-  content: '';
-  width: 3px;
-  height: 16px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.5);
-  transition: background 0.15s;
-}
-
-.tl-handle:hover::after,
-.tl-handle.active::after {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.tl-handle.left {
-  transform: translateX(-50%);
-}
-
-.tl-handle.right {
-  transform: translateX(-50%);
-}
-
-.tl-range-label {
-  position: absolute;
-  bottom: -18px;
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  gap: 6px;
   white-space: nowrap;
-  pointer-events: none;
-  font-family: var(--font);
-  transform: translateX(-50%);
-  left: 50%;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
-.tl-handle:hover .tl-range-label,
-.tl-handle.active .tl-range-label {
-  opacity: 1;
+.nav-stat + .nav-stat::before {
+  content: '';
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+  margin-right: 6px;
 }
 
-body.tl-dragging,
-body.tl-dragging * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
+.nav-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.tl-cursor, .tl-thumb, .tl-year-label {
-  display: none;
+.nav-stat-value {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 /* ── CONTROLS (search, clear) ── */

@@ -47,7 +47,6 @@ class UIPanels {
 
   hudTracks: HTMLElement | null = null;
   hudArtists: HTMLElement | null = null;
-  statYears: HTMLElement | null = null;
 
   onSelectTrack: ((track: Track) => void) | null = null;
   onSelectStation: ((sid: string) => void) | null = null;
@@ -90,7 +89,6 @@ class UIPanels {
 
     this.hudTracks = $('hudTracks');
     this.hudArtists = $('hudArtists');
-    this.statYears = $('statYears');
 
     this.bindEvents(options);
   }
@@ -263,17 +261,13 @@ class UIPanels {
   updateFilteredStats(visibleTracks: Track[]): void {
     const count = visibleTracks.length;
     const artistSet = new Set<string>();
-    let minY = Infinity, maxY = -Infinity;
     for (let i = 0; i < count; i++) {
       const t = visibleTracks[i];
       if (t.artist) artistSet.add(t.artist.toLowerCase());
-      if (t.year < minY) minY = t.year;
-      if (t.year > maxY) maxY = t.year;
     }
 
     if (this.hudTracks) this.hudTracks.textContent = count.toLocaleString();
     if (this.hudArtists) this.hudArtists.textContent = artistSet.size.toLocaleString();
-    if (this.statYears) this.statYears.textContent = (count > 0 && minY !== Infinity) ? `${minY}–${maxY}` : '—';
   }
 
   renderStationList(

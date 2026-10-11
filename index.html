@@ -127,18 +127,9 @@
       <span class="logo-text" id="headerTitle">OSTALGIE</span>
     </div>
 
-    <div class="timeline-wrap" id="timelineWrap">
-      <div class="tl-track" id="tlTrack">
-        <div class="tl-bars" id="tlBars"></div>
-        <div class="tl-range-overlay left" id="tlOverlayL" style="width:0%"></div>
-        <div class="tl-range-overlay right" id="tlOverlayR" style="width:0%"></div>
-        <div class="tl-handle left" id="tlHandleL" style="left:0%">
-          <div class="tl-range-label" id="tlLabelL">1967</div>
-        </div>
-        <div class="tl-handle right" id="tlHandleR" style="left:100%">
-          <div class="tl-range-label" id="tlLabelR">2005</div>
-        </div>
-      </div>
+    <div class="nav-stats">
+      <div class="nav-stat"><span class="nav-stat-label">Tracks</span><span class="nav-stat-value" id="hudTracks">1,080</span></div>
+      <div class="nav-stat"><span class="nav-stat-label">Artists</span><span class="nav-stat-value" id="hudArtists">640</span></div>
     </div>
 
     <div class="search-wrap">
@@ -214,44 +205,45 @@
     </div>
   </div>
 
-  <!-- Bottom Stats Pills -->
-  <div class="bottom-bar">
-    <div class="stat"><span class="stat-label">Tracks</span><span class="stat-value" id="hudTracks">1,080</span></div>
-    <div class="stat"><span class="stat-label">Artists</span><span class="stat-value" id="hudArtists">640</span></div>
-    <div class="stat"><span class="stat-label">Span</span><span class="stat-value" id="statYears">1967–2005</span></div>
-  </div>
-
-  <!-- Bottom Player Bar -->
-  <div class="player-bar">
+  <!-- Hovering Player Widget -->
+  <div class="player-bar" id="playerBar">
     <div class="player-left" id="playerLeft">
       <div class="player-art-placeholder" id="playerArt"></div>
-      <div class="player-info">
+    </div>
+    <div class="player-right">
+      <div class="player-info" id="playerInfo">
         <div class="player-title" id="playerTitle">No track selected</div>
         <div class="player-artist" id="playerArtist"><span id="playerArtistText">Click a node to play</span></div>
       </div>
-    </div>
-    <button class="p-btn" id="pPrev" title="Previous"></button>
-    <button class="p-btn main" id="pToggle" title="Play"></button>
-    <button class="p-btn" id="pNext" title="Next"></button>
-    <div class="vol-wrap" id="volWrap">
-      <button class="p-btn" id="volBtn" title="Volume"></button>
-      <div class="vol-popup" id="volPopup">
-        <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="50">
-        <div class="vol-pct" id="volPct">50%</div>
+      <div class="player-progress" id="pProgress">
+        <div class="player-time"><span id="pTime">0:00</span><span id="pDur">0:00</span></div>
+        <div class="player-progress-bar" id="pBar">
+          <div class="player-progress-ghost" id="pGhost"></div>
+          <div class="player-progress-fill" id="pFill"></div>
+          <div class="player-progress-livedot" id="pLiveDot"></div>
+          <div class="player-progress-livetime" id="pLiveTime">0:00</div>
+          <div class="player-progress-tooltip" id="pTooltip">0:00</div>
+          <div class="player-progress-hitarea" id="pHitarea"></div>
+        </div>
+      </div>
+      <div class="player-controls">
+        <div class="player-controls-left">
+          <button class="p-btn" id="pPrev" title="Previous"></button>
+          <button class="p-btn main" id="pToggle" title="Play"></button>
+          <button class="p-btn" id="pNext" title="Next"></button>
+        </div>
+        <div class="player-controls-right">
+          <button class="shuffle-btn" id="shuffleBtn" title="Shuffle"></button>
+          <div class="vol-wrap" id="volWrap">
+            <button class="p-btn" id="volBtn" title="Volume"></button>
+            <div class="vol-popup" id="volPopup">
+              <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="50">
+              <div class="vol-pct" id="volPct">50%</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="player-progress" id="pProgress">
-      <div class="player-progress-bar" id="pBar">
-        <div class="player-progress-ghost" id="pGhost"></div>
-        <div class="player-progress-fill" id="pFill"></div>
-        <div class="player-progress-livedot" id="pLiveDot"></div>
-        <div class="player-progress-livetime" id="pLiveTime">0:00</div>
-        <div class="player-progress-tooltip" id="pTooltip">0:00</div>
-        <div class="player-progress-hitarea" id="pHitarea"></div>
-      </div>
-      <div class="player-time"><span id="pTime">0:00</span><span id="pDur">0:00</span></div>
-    </div>
-    <button class="shuffle-btn" id="shuffleBtn" title="Shuffle"></button>
   </div>
 
   <!-- Hidden YouTube player container -->

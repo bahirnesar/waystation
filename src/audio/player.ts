@@ -106,15 +106,23 @@ class AudioPlayer {
       });
     }
 
+    const showDetailHandler = () => {
+      if (this.activeTrack) {
+        sfx.play('click');
+        if (this.onShowDetail) this.onShowDetail(this.activeTrack);
+      }
+    };
+
     if (this.playerLeft) {
       this.playerLeft.style.cursor = 'pointer';
       this.playerLeft.title = 'Show track recommendations';
-      this.playerLeft.addEventListener('click', () => {
-        if (this.activeTrack) {
-          sfx.play('click');
-          if (this.onShowDetail) this.onShowDetail(this.activeTrack);
-        }
-      });
+      this.playerLeft.addEventListener('click', showDetailHandler);
+    }
+
+    const playerInfo = document.getElementById('playerInfo');
+    if (playerInfo) {
+      playerInfo.title = 'Show track recommendations';
+      playerInfo.addEventListener('click', showDetailHandler);
     }
   }
 

@@ -7,7 +7,6 @@ import { globe } from './scene/globe';
 import { controls } from './scene/controls';
 import { player } from './audio/player';
 import { sfx } from './audio/sfx';
-import { timeline } from './ui/timeline';
 import { panels } from './ui/panels';
 import { initIcons } from './ui/icons';
 import { Track } from './types/index';
@@ -102,16 +101,7 @@ controls.onResetCam = () => {
   panels.closeDetailPanel();
 };
 
-// 5. Setup Timeline
-timeline.init({
-  onRangeChange: ({ rangeYearL, rangeYearR }) => {
-    state.rangeYearL = rangeYearL;
-    state.rangeYearR = rangeYearR;
-    syncVisuals();
-  }
-});
-
-// 6. Setup Stations & Switch Handler
+// 5. Setup Stations & Switch Handler
 function switchToStation(sid: string): void {
   const station = stations.find(s => s.id === sid);
   if (!station) return;
@@ -127,10 +117,6 @@ function switchToStation(sid: string): void {
   if (headerTitle) {
     headerTitle.textContent = sid === 'all' ? 'OSTALGIE' : `OSTALGIE : ${station.name.toUpperCase()}`;
   }
-
-  // Reset timeline
-  timeline.rebuildTimelineBars(state.currentStationTracks);
-  timeline.resetRange();
 
   // Reset & shuffle queue
   player.setQueue(state.currentStationTracks);
@@ -179,9 +165,8 @@ panels.init({
   onResetCam: () => controls.resetCamera()
 });
 
-// 8. Initial Visuals & Stats
-timeline.rebuildTimelineBars(state.currentStationTracks);
-timeline.updateRangeUI();
+// 7. Initial Visuals & Stats
+syncVisuals();
 panels.renderStationList(stations, '', state.currentStationId, switchToStation);
 
 // 10. Primary Animation Loop
