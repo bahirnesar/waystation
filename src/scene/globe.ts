@@ -35,6 +35,7 @@ class GlobeScene {
 
   starfieldMesh: THREE.Points | null = null;
   starMat: THREE.ShaderMaterial | null = null;
+  earthMat: THREE.ShaderMaterial | null = null;
   innerAtmosMesh: THREE.Mesh | null = null;
   outerAtmosMesh: THREE.Mesh | null = null;
   bordersMesh: THREE.Mesh | null = null;
@@ -72,7 +73,6 @@ class GlobeScene {
 
     // 1. Scene & Camera
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x000000, 0.001);
 
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 3000);
     this.camera.position.set(0, 40, 320);
@@ -81,21 +81,11 @@ class GlobeScene {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
     this.container.appendChild(this.renderer.domElement);
 
     // 3. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
     this.scene.add(ambientLight);
-
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight1.position.set(200, 150, 200);
-    this.scene.add(dirLight1);
-
-    const dirLight2 = new THREE.DirectionalLight(0x7090b8, 0.8);
-    dirLight2.position.set(-200, -100, -150);
-    this.scene.add(dirLight2);
 
     // 4. Globe Group
     this.globeGroup = new THREE.Group();
@@ -103,13 +93,12 @@ class GlobeScene {
     this.globeGroup.rotation.y = -2.20;
     this.scene.add(this.globeGroup);
 
-    // 5. Starfield (added to globeGroup so it rotates with the globe)
+    // 5. Starfield (hidden by default on dot-grid background, still toggleable)
     this.createStarfield();
+    if (this.starfieldMesh) this.starfieldMesh.visible = false;
 
-    // 6. Base Sphere, Graticules, Atmospheric Rim, Borders
+    // 6. Base Sphere & Geographical Borders
     this.createEarthBase();
-    this.createGraticules();
-    this.createAtmosphericRim();
     this.loadBorders();
 
     // 7. Track Dots Particle System
@@ -252,134 +241,48 @@ class GlobeScene {
 
   createEarthBase(): void {
     const earthGeom = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
-    const earthMat = new THREE.MeshStandardMaterial({
-      color: 0x060914,
-      metalness: 0.15,
-      roughness: 0.85
+    this.earthMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uDark: { value: 0.0 }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform float uDark;
+        varying vec3 vNormal;
+        void main() {
+          vec3 norm = normalize(vNormal);
+
+          // Gradient from top-left to bottom-right
+          float grad = clamp((norm.y * 0.65 - norm.x * 0.35) * 0.5 + 0.5, 0.0, 1.0);
+
+          // Light mode: cream to warm pastel orange
+          vec3 cream = vec3(0.98, 0.93, 0.85);
+          vec3 midOrange = vec3(0.97, 0.72, 0.53);
+          vec3 deepOrange = vec3(0.94, 0.54, 0.42);
+          vec3 lightCol = mix(deepOrange, midOrange, smoothstep(0.0, 0.55, grad));
+          lightCol = mix(lightCol, cream, smoothstep(0.45, 1.0, grad));
+
+          // Dark mode: deep midnight navy to dark abyssal blue gradient
+          vec3 topBlue = vec3(0.08, 0.16, 0.30);
+          vec3 midBlue = vec3(0.035, 0.075, 0.16);
+          vec3 deepNavy = vec3(0.012, 0.025, 0.065);
+          vec3 darkCol = mix(deepNavy, midBlue, smoothstep(0.0, 0.55, grad));
+          darkCol = mix(darkCol, topBlue, smoothstep(0.45, 1.0, grad));
+
+          gl_FragColor = vec4(mix(lightCol, darkCol, uDark), 1.0);
+        }
+      `
     });
-    const earthMesh = new THREE.Mesh(earthGeom, earthMat);
+    const earthMesh = new THREE.Mesh(earthGeom, this.earthMat);
+    earthMesh.renderOrder = 0;
     this.globeGroup.add(earthMesh);
-  }
-
-  createGraticules(): void {
-    const positions: number[] = [];
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0x1e1e1e,
-      transparent: true,
-      opacity: 0.6
-    });
-
-    for (let lat = -75; lat <= 75; lat += 15) {
-      const r = GLOBE_RADIUS * Math.cos(lat * Math.PI / 180);
-      const y = GLOBE_RADIUS * Math.sin(lat * Math.PI / 180);
-      for (let deg = 0; deg < 360; deg += 4) {
-        const rad1 = deg * Math.PI / 180;
-        const rad2 = (deg + 4) * Math.PI / 180;
-        positions.push(
-          r * Math.cos(rad1), y, r * Math.sin(rad1),
-          r * Math.cos(rad2), y, r * Math.sin(rad2)
-        );
-      }
-    }
-
-    for (let lng = 0; lng < 360; lng += 30) {
-      const rad = lng * Math.PI / 180;
-      for (let lat = -90; lat < 90; lat += 4) {
-        const phi1 = lat * Math.PI / 180;
-        const phi2 = (lat + 4) * Math.PI / 180;
-        positions.push(
-          GLOBE_RADIUS * Math.cos(phi1) * Math.sin(rad), GLOBE_RADIUS * Math.sin(phi1), GLOBE_RADIUS * Math.cos(phi1) * Math.cos(rad),
-          GLOBE_RADIUS * Math.cos(phi2) * Math.sin(rad), GLOBE_RADIUS * Math.sin(phi2), GLOBE_RADIUS * Math.cos(phi2) * Math.cos(rad)
-        );
-      }
-    }
-
-    const geom = new THREE.BufferGeometry();
-    geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    this.globeGroup.add(new THREE.LineSegments(geom, lineMat));
-  }
-
-  createAtmosphericRim(): void {
-    // 1. Inner Atmospheric Rim (Fresnel limb on front surface: completely invisible head-on, delicate subtle rim at horizon)
-    const innerGeom = new THREE.SphereGeometry(GLOBE_RADIUS * 1.0015, 64, 64);
-    const innerMat = new THREE.ShaderMaterial({
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vViewPosition = -mvPosition.xyz;
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          vec3 viewDir = normalize(vViewPosition);
-          vec3 norm = normalize(vNormal);
-
-          // dotView: 1.0 at center (head-on), 0.0 at grazing edge (horizon)
-          float dotView = max(0.0, dot(norm, viewDir));
-          float horizon = 1.0 - dotView;
-
-          // Atmospheric limb: completely invisible head-on, razor thin subtle rise at horizon
-          float intensity = pow(horizon, 4.8) * 0.30;
-
-          vec3 deepAtmos = vec3(0.10, 0.30, 0.75);
-          vec3 brightLimb = vec3(0.30, 0.62, 0.95);
-          vec3 atmosColor = mix(deepAtmos, brightLimb, pow(horizon, 2.0));
-
-          gl_FragColor = vec4(atmosColor, intensity);
-        }
-      `,
-      blending: THREE.AdditiveBlending,
-      side: THREE.FrontSide,
-      transparent: true,
-      depthWrite: false,
-      fog: false
-    });
-    this.innerAtmosMesh = new THREE.Mesh(innerGeom, innerMat);
-    this.globeGroup.add(this.innerAtmosMesh);
-
-    // 2. Outer Atmospheric Halo (soft delicate glow extending minimally into space, subtle and hugging horizon)
-    const outerGeom = new THREE.SphereGeometry(GLOBE_RADIUS * 1.028, 64, 64);
-    const outerMat = new THREE.ShaderMaterial({
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vViewPosition = -mvPosition.xyz;
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          vec3 viewDir = normalize(vViewPosition);
-          vec3 norm = normalize(vNormal);
-
-          // In the narrow ring beyond the globe (radius 100 to 102.8), dotVal ranges from ~0.232 down to 0.0
-          float dotVal = -dot(norm, viewDir);
-          float intensity = clamp(dotVal / 0.232, 0.0, 1.0);
-          intensity = pow(intensity, 2.2) * 0.20;
-
-          vec3 haloColor = vec3(0.20, 0.50, 0.92);
-          gl_FragColor = vec4(haloColor, intensity);
-        }
-      `,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      transparent: true,
-      depthWrite: false,
-      fog: false
-    });
-    this.outerAtmosMesh = new THREE.Mesh(outerGeom, outerMat);
-    this.globeGroup.add(this.outerAtmosMesh);
   }
 
   async loadBorders(): Promise<void> {
@@ -397,24 +300,43 @@ class GlobeScene {
       if (!ctx) return;
 
       ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = '#283444';
-      ctx.lineWidth = 1.4;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
       const scaleX = width / 360;
       const scaleY = height / 180;
 
-      ctx.beginPath();
-      for (let r = 0; r < lines.length; r++) {
-        const ring = lines[r];
-        if (ring.length < 2) continue;
-        ctx.moveTo((ring[0][0] + 180) * scaleX, (90 - ring[0][1]) * scaleY);
-        for (let i = 1; i < ring.length; i++) {
-          ctx.lineTo((ring[i][0] + 180) * scaleX, (90 - ring[i][1]) * scaleY);
+      const drawLandmasses = (strokeWidth: number) => {
+        ctx.lineWidth = strokeWidth;
+        for (let r = 0; r < lines.length; r++) {
+          const ring = lines[r];
+          if (ring.length < 2) continue;
+          ctx.beginPath();
+          ctx.moveTo((ring[0][0] + 180) * scaleX, (90 - ring[0][1]) * scaleY);
+          for (let i = 1; i < ring.length; i++) {
+            ctx.lineTo((ring[i][0] + 180) * scaleX, (90 - ring[i][1]) * scaleY);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
         }
-      }
-      ctx.stroke();
+      };
+
+      // Pass 1: Draw dilated landmass silhouettes
+      ctx.globalCompositeOperation = 'source-over';
+      drawLandmasses(8.4);
+
+      // Pass 2: Punch out landmass interiors & shared country borders, leaving only coastlines
+      ctx.globalCompositeOperation = 'destination-out';
+      drawLandmasses(2.0);
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Clear equirectangular map seam at ±180° longitude and South Pole edge
+      ctx.clearRect(0, 0, 5, height);
+      ctx.clearRect(width - 5, 0, 5, height);
+      ctx.clearRect(0, height - 5, width, 5);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.wrapS = THREE.RepeatWrapping;
@@ -427,10 +349,11 @@ class GlobeScene {
       const mat = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
-        opacity: 0.45,
+        opacity: 0.95,
         depthWrite: false
       });
       this.bordersMesh = new THREE.Mesh(geom, mat);
+      this.bordersMesh.renderOrder = 1;
       this.globeGroup.add(this.bordersMesh);
     } catch { }
   }
@@ -465,12 +388,12 @@ class GlobeScene {
       this.elevatedPositions[i3 + 1] = v.y + n.y * h;
       this.elevatedPositions[i3 + 2] = v.z + n.z * h;
 
-      dotColors[i3] = 0.96;
-      dotColors[i3 + 1] = 0.98;
+      dotColors[i3] = 1.0;
+      dotColors[i3 + 1] = 1.0;
       dotColors[i3 + 2] = 1.0;
 
-      dotSizes[i] = 3.8;
-      dotAlphas[i] = 0.85;
+      dotSizes[i] = 8.2;
+      dotAlphas[i] = 1.0;
       dotPhases[i] = Math.random() * Math.PI * 2.0;
     }
 
@@ -483,20 +406,22 @@ class GlobeScene {
     this.dotsGeo.setAttribute('aHeight', new THREE.BufferAttribute(this.dotHeights, 1));
     this.dotsGeo.setAttribute('aPhase', new THREE.BufferAttribute(dotPhases, 1));
 
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
     this.dotsMat = new THREE.ShaderMaterial({
       uniforms: {
-        uTime: { value: 0 }
+        uTime: { value: 0 },
+        uPixelRatio: { value: pixelRatio }
       },
       vertexShader: `
         uniform float uTime;
+        uniform float uPixelRatio;
         attribute float aSize;
         attribute float aAlpha;
         attribute float aHeight;
         attribute float aPhase;
         varying vec3 vColor;
         varying float vAlpha;
-        varying float vHorizon;
-        varying float vTwinkle;
 
         void main() {
           vColor = color;
@@ -508,71 +433,61 @@ class GlobeScene {
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
           vec3 viewDir = normalize(-mv.xyz);
           vec3 normView = normalize(normalMatrix * norm);
-
           float dotView = dot(normView, viewDir);
-          float horizon = smoothstep(0.36, -0.04, dotView);
-          vHorizon = horizon;
 
-          float t = uTime * 3.8 + aPhase * 6.28318;
-          float twinkle = sin(t) * cos(t * 0.618 + aPhase) * sin(t * 1.414 + 1.2);
-          twinkle = clamp(0.5 + 0.5 * twinkle, 0.0, 1.0);
-          vTwinkle = twinkle;
+          gl_PointSize = max(aSize * (220.0 / -mv.z), 6.5) * uPixelRatio;
 
-          vec3 atmosTint = vec3(0.58, 0.88, 1.0);
-          vColor = mix(color, atmosTint, horizon * 0.52);
-
-          float sizeMod = 1.0 + horizon * (twinkle * 0.45 - 0.08);
-          gl_PointSize = max(aSize * (175.0 / -mv.z) * sizeMod, 2.0);
-
-          float alphaTwinkle = mix(1.0, 0.40 + 0.90 * twinkle, horizon);
-          vAlpha = aAlpha * alphaTwinkle;
-
+          // Pull visible front-hemisphere dots slightly toward the camera in depth
+          // so flat point sprites never clip into the curved globe/borders, while
+          // dots beyond the horizon (dotView <= 0) remain occluded by the globe.
+          mv.z += 3.2 * smoothstep(0.0, 0.12, dotView);
           gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
         varying vec3 vColor;
         varying float vAlpha;
-        varying float vHorizon;
-        varying float vTwinkle;
 
         void main() {
+          if (vAlpha < 0.05) discard;
           vec2 coord = gl_PointCoord - vec2(0.5);
           float d = length(coord);
           if (d > 0.5) discard;
 
-          // Diffused edge falloff matching the music project
-          float diffused = 1.0 - smoothstep(0.0, 0.5, d);
-          float halo = pow(diffused, 1.5) * vHorizon * (0.35 + 0.50 * vTwinkle);
+          vec3 borderCol = vec3(0.118, 0.106, 0.094);
+          vec3 fillCol = vColor;
 
-          float finalAlpha = clamp(diffused + halo * 0.4, 0.0, 1.0) * vAlpha;
-          vec3 finalColor = vColor + vec3(0.28, 0.58, 0.96) * (vHorizon * halo);
+          float borderMix = smoothstep(0.32, 0.36, d);
+          vec3 col = mix(fillCol, borderCol, borderMix);
 
-          gl_FragColor = vec4(finalColor, finalAlpha);
+          float edgeAlpha = 1.0 - smoothstep(0.46, 0.50, d);
+          gl_FragColor = vec4(col, edgeAlpha * vAlpha);
         }
       `,
       transparent: true,
       vertexColors: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
 
     this.dotsMesh = new THREE.Points(this.dotsGeo, this.dotsMat);
+    this.dotsMesh.renderOrder = 2;
     this.globeGroup.add(this.dotsMesh);
   }
 
   createMarkerRings(): void {
-    const createRing = (color: number, radius: number = 1.35, tube: number = 0.08) => {
+    const createRing = (color: number, radius: number = 1.45, tube: number = 0.14) => {
       const geom = new THREE.TorusGeometry(radius, tube, 16, 32);
-      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, depthWrite: false });
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
       const mesh = new THREE.Mesh(geom, mat);
+      mesh.renderOrder = 3;
       mesh.visible = false;
       this.globeGroup.add(mesh);
       return mesh;
     };
 
-    this.hoverRing = createRing(0xffffff, 1.35, 0.08);
-    this.activeRing = createRing(0x38bdf8, 1.8, 0.12);
+    this.hoverRing = createRing(0x1E1B18, 1.45, 0.14);
+    this.activeRing = createRing(0xE84A3A, 1.9, 0.16);
   }
 
   positionMarkerRing(ring: THREE.Mesh | null, trackIdx: number): void {
@@ -598,7 +513,7 @@ class GlobeScene {
     if (!this.hoverRing) return;
     if (idx !== -1) {
       this.positionMarkerRing(this.hoverRing, idx);
-      this.hoverRing.material.color.set(0xffffff);
+      this.hoverRing.material.color.set(0x1E1B18);
       this.hoverRing.visible = true;
     } else {
       this.hoverRing.visible = false;
@@ -621,17 +536,17 @@ class GlobeScene {
 
       if (isVisible) {
         visibleTracks.push(t);
-        alphaArr[i] = 0.88;
-        sizeArr[i] = 3.6;
-        colorArr[i * 3] = 0.96;
-        colorArr[i * 3 + 1] = 0.98;
-        colorArr[i * 3 + 2] = 1.0;
+        alphaArr[i] = 1.0;
+        sizeArr[i] = 8.2;
+        colorArr[i * 3] = 1.0;
+        colorArr[i * 3 + 1] = 0.99;
+        colorArr[i * 3 + 2] = 0.97;
       } else {
-        alphaArr[i] = inStation ? 0.04 : 0.0;
-        sizeArr[i] = 2.0;
-        colorArr[i * 3] = 0.45;
-        colorArr[i * 3 + 1] = 0.45;
-        colorArr[i * 3 + 2] = 0.45;
+        alphaArr[i] = inStation ? 0.15 : 0.0;
+        sizeArr[i] = 4.8;
+        colorArr[i * 3] = 0.95;
+        colorArr[i * 3 + 1] = 0.88;
+        colorArr[i * 3 + 2] = 0.82;
       }
     }
 
@@ -741,8 +656,13 @@ class GlobeScene {
 
   toggleStarfield(): boolean {
     if (this.starfieldMesh) {
-      this.starfieldMesh.visible = !this.starfieldMesh.visible;
-      return this.starfieldMesh.visible;
+      const isDark = !this.starfieldMesh.visible;
+      this.starfieldMesh.visible = isDark;
+      if (this.earthMat) {
+        this.earthMat.uniforms.uDark.value = isDark ? 1.0 : 0.0;
+      }
+      document.body.classList.toggle('dark-mode', isDark);
+      return isDark;
     }
     return false;
   }

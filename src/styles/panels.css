@@ -1,40 +1,47 @@
 /* ── INFO BUTTON & PANEL ───────────────────────────── */
 .info-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
-  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: border-color 0.15s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   flex-shrink: 0;
 }
 
 .info-btn > svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
 .info-btn:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: var(--text-primary);
+  background: var(--accent-dim);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.info-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border);
 }
 
 .info-panel {
   position: fixed;
   right: 14px;
-  top: 54px;
+  top: 66px;
   width: 360px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 130px);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
   padding: 16px;
   z-index: 180;
   opacity: 0;
@@ -42,7 +49,7 @@
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   overflow-y: auto;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-lg);
   font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.5;
@@ -56,29 +63,17 @@
 
 .info-panel-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 22px;
-  height: 22px;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
   z-index: 5;
 }
 
 .info-panel-close svg {
   width: 14px;
   height: 14px;
-}
-
-.info-panel-close:hover {
-  border-color: var(--text-muted);
-  color: var(--text-primary);
 }
 
 .info-panel p {
@@ -92,9 +87,9 @@
 .info-controls {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 6px;
   margin-top: 10px;
-  border-top: 1px solid var(--border);
+  border-top: 1.5px solid var(--border);
   padding-top: 10px;
 }
 
@@ -102,9 +97,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   user-select: none;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+}
+
+.info-ctrl-row:hover {
+  background: var(--accent-dim);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
 }
 
 .info-ctrl-row .info-ctrl-check {
@@ -123,20 +129,16 @@
   margin-right: 8px;
 }
 
-.info-ctrl-row:hover .info-ctrl-label {
-  color: var(--text-primary);
-}
-
 .info-ctrl-check {
-  width: 28px;
-  height: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
+  width: 30px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s;
   position: relative;
   padding: 0 2px;
   cursor: pointer;
@@ -147,19 +149,19 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
   transform: translateX(0);
 }
 
 .info-ctrl-check.on {
   background: var(--accent);
-  border-color: var(--accent);
 }
 
 .info-ctrl-check.on::after {
-  background: var(--bg);
-  transform: translateX(10px);
+  background: var(--bg-surface);
+  transform: translateX(11px);
 }
 
 .info-ctrl-check svg {
@@ -167,13 +169,13 @@
 }
 
 .info-ctrl-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: var(--text-primary);
 }
 
 .info-ctrl-icon svg {
@@ -181,48 +183,53 @@
   height: 14px;
 }
 
-.info-ctrl-row:hover .info-ctrl-icon {
-  color: var(--text-primary);
-}
-
 .info-ctrl-label {
   flex: 1;
   font-size: 11px;
-  color: var(--text-secondary);
-  transition: color 0.12s;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .info-ctrl-key {
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text-primary);
   letter-spacing: 0.06em;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
   flex-shrink: 0;
 }
 
 /* ── STATIONS / SECTOR PANEL ──────────────────────── */
 .sector-btn {
-  height: 30px;
+  height: 28px;
   padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font: 11px var(--font);
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-on-accent);
+  font: 600 11px var(--font);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: border-color 0.15s, color 0.15s;
+  gap: 5px;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   flex-shrink: 0;
   letter-spacing: 0.04em;
 }
 
 .sector-btn:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: var(--text-primary);
+  background: var(--accent-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.sector-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border);
 }
 
 .btn-icon {
@@ -239,12 +246,12 @@
 .sector-panel {
   position: fixed;
   right: 14px;
-  top: 54px;
+  top: 66px;
   width: 340px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 130px);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
   padding: 16px;
   z-index: 180;
   opacity: 0;
@@ -252,7 +259,7 @@
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   overflow-y: auto;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-lg);
 }
 
 .sector-panel.open {
@@ -262,7 +269,7 @@
 }
 
 .sector-panel-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -274,46 +281,54 @@
   width: 100%;
   height: 32px;
   padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   font: 11px var(--font);
   color: var(--text-primary);
   outline: none;
-  margin-bottom: 10px;
-  transition: border-color 0.15s;
+  margin-bottom: 12px;
+  transition: box-shadow 0.15s;
 }
 
 .sector-search-input:focus {
-  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .sector-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .sector-item {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   position: relative;
 }
 
 .sector-item:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--accent-dim);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
 }
 
 .sector-item.active {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.sector-item.active .sector-item-name {
+  color: var(--text-on-accent);
 }
 
 .sector-item-top {
@@ -325,7 +340,7 @@
 .sector-item-name {
   font-size: 12px;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   flex: 1;
   min-width: 0;
@@ -333,7 +348,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-left: -4px;
 }
 
 .sector-item-bottom {
@@ -352,44 +366,58 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sector-item.active .sector-item-count {
+  background: var(--bg-surface);
 }
 
 .sector-item-count svg {
   width: 12px;
   height: 12px;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .sector-item-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--accent-alt);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: var(--text-on-accent);
+}
+
+.sector-item.active .sector-item-icon {
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .sector-item-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 /* ── DETAIL PANEL ─────────────────────────────────── */
 .detail-panel {
   position: fixed;
   right: 14px;
-  top: 54px;
+  top: 66px;
   width: 340px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 130px);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
   padding: 0;
   z-index: 120;
   opacity: 0;
@@ -399,7 +427,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-lg);
 }
 
 .detail-panel.open {
@@ -410,18 +438,11 @@
 
 .detail-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 22px;
-  height: 22px;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
   z-index: 10;
 }
 
@@ -430,17 +451,12 @@
   height: 14px;
 }
 
-.detail-close:hover {
-  border-color: var(--text-muted);
-  color: var(--text-primary);
-}
-
 .detail-sticky-header {
   position: sticky;
   top: 0;
   z-index: 5;
   background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   padding: 16px 16px 14px;
 }
 
@@ -451,12 +467,13 @@
 }
 
 .detail-art {
-  width: 56px;
-  height: 56px;
-  border-radius: 6px;
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
   object-fit: cover;
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
@@ -472,12 +489,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 20px;
+  padding-right: 26px;
 }
 
 .detail-artist-name {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -487,8 +504,8 @@
 .detail-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 6px;
+  gap: 5px;
+  margin-top: 8px;
 }
 
 .detail-sc-link {
@@ -496,15 +513,23 @@
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text-on-accent);
   text-decoration: none;
-  margin-top: 6px;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
   letter-spacing: 0.04em;
-  transition: color 0.15s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
 }
 
 .detail-sc-link:hover {
-  color: var(--text-primary);
+  background: var(--accent-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
 }
 
 .detail-sc-link svg {
@@ -515,13 +540,14 @@
 .detail-scroll-body {
   overflow-y: auto;
   flex: 1;
-  padding: 0 16px 16px;
+  padding: 0 14px 16px;
 }
 
 .detail-divider {
-  height: 1px;
+  height: 1.5px;
   background: var(--border);
   margin: 12px 0;
+  opacity: 0.2;
 }
 
 .detail-section-title {
@@ -529,40 +555,45 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
 .detail-tracks-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
 }
 
 .detail-track-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 8px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   font-size: 11px;
   color: var(--text-secondary);
 }
 
 .detail-track-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--accent-dim);
   color: var(--text-primary);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
 }
 
 .detail-track-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
   object-fit: cover;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -573,7 +604,8 @@
 
 .detail-track-year {
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text-secondary);
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -585,7 +617,7 @@
   justify-content: space-between;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
   padding-right: 28px;
 }
 

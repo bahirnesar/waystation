@@ -1,17 +1,20 @@
 /* ── TOP BAR ──────────────────────────────────────── */
 .top-bar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 48px;
+  top: 12px;
+  left: 14px;
+  right: 14px;
+  height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
   z-index: 100;
-  padding: 0 14px;
-  background: linear-gradient(180deg, var(--bg) 60%, transparent);
-  pointer-events: none;
+  padding: 0 10px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
   overflow: visible;
 }
 
@@ -23,21 +26,40 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--accent-alt);
+  box-shadow: var(--shadow-sm);
   user-select: none;
   flex-shrink: 0;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+}
+
+.logo:hover {
+  background: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.logo:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border);
 }
 
 .logo-mark {
-  opacity: 0.5;
+  opacity: 0.9;
+  color: var(--text-on-accent);
 }
 
 .logo-text {
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-on-accent);
   white-space: nowrap;
 }
 
@@ -45,12 +67,13 @@
 .nav-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  gap: 10px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   user-select: none;
   -webkit-user-select: none;
   flex-shrink: 0;
@@ -65,14 +88,14 @@
 
 .nav-stat + .nav-stat::before {
   content: '';
-  width: 1px;
+  width: 1.5px;
   height: 12px;
   background: var(--border);
-  margin-right: 6px;
+  margin-right: 4px;
 }
 
 .nav-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -81,25 +104,27 @@
 .nav-stat-value {
   font-size: 11px;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* ── CONTROLS (search, clear) ── */
 .search-box {
-  height: 30px;
+  height: 28px;
   width: 100%;
   padding: 0 28px 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   font: 11px var(--font);
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .search-box:focus {
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md);
 }
 
 .search-box::placeholder {
@@ -124,10 +149,10 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   position: absolute;
-  right: 3px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
   border: none;
@@ -151,13 +176,13 @@
 /* ── SEARCH RESULTS PANEL ────────────────────────── */
 .search-results {
   position: fixed;
-  top: 54px;
+  top: 66px;
   right: 14px;
   width: 380px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 130px);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
   z-index: 180;
   overflow: hidden;
   opacity: 0;
@@ -166,7 +191,7 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-lg);
 }
 
 .search-results.open {
@@ -180,17 +205,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   background: var(--bg-surface);
   flex-shrink: 0;
 }
 
 .sr-browse-count {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .sr-body {
@@ -198,5 +223,6 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 6px 0;
+  padding: 8px;
+  gap: 4px;
 }

@@ -14,11 +14,11 @@
 }
 
 .tooltip-pill {
-  padding: 5px 10px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
   max-width: 300px;
   display: flex;
   align-items: center;
@@ -28,10 +28,11 @@
 .tooltip-art {
   width: 32px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
   background: var(--bg-surface);
+  border: 1.5px solid var(--border);
 }
 
 .tooltip-text {
@@ -41,6 +42,7 @@
 
 .tooltip-title {
   font-size: 11px;
+  font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -59,9 +61,9 @@
 .tooltip-arrow {
   width: 0;
   height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid var(--border);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--border);
 }
 
 /* ── UI TOOLTIP ───────────────────────────────────── */
@@ -70,12 +72,12 @@
   pointer-events: none;
   z-index: 200;
   padding: 4px 10px;
-  border-radius: 5px;
+  border-radius: 8px;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
   white-space: nowrap;
   opacity: 0;
   left: -9999px;
@@ -95,27 +97,43 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+  box-shadow: 1.5px 1.5px 0px var(--border);
+}
+
+.badge--accent {
+  background: var(--accent-alt);
+  color: var(--text-on-accent);
 }
 
 .icon-close-btn {
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  transition: all 0.15s;
+  color: var(--text-on-accent);
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
 }
 
 .icon-close-btn:hover {
-  border-color: var(--text-muted);
-  color: var(--text-primary);
+  background: var(--accent-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.icon-close-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border);
 }
 
 /* ── RESPONSIVE MEDIA QUERIES ─────────────────────── */

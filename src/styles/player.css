@@ -1,22 +1,22 @@
 /* ── HOVERING PLAYER WIDGET ───────────────────────── */
 .player-bar {
   --p-art-size: clamp(80px, 8.5vw, 128px);
-  --p-btn-size: clamp(24px, 2.2vw, 32px);
-  --p-main-btn-size: clamp(28px, 2.6vw, 38px);
+  --p-btn-size: clamp(26px, 2.3vw, 32px);
+  --p-main-btn-size: clamp(30px, 2.7vw, 38px);
   position: fixed;
   bottom: clamp(12px, 2.2vmin, 32px);
   left: clamp(12px, 2.2vmin, 32px);
   width: clamp(320px, 34vw, 560px);
   max-width: calc(100vw - 24px);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: clamp(10px, 1vw, 16px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
   display: flex;
   align-items: stretch;
   z-index: 200;
-  padding: clamp(12px, 1.3vw, 20px);
-  gap: clamp(12px, 1.3vw, 20px);
+  padding: clamp(12px, 1.3vw, 18px);
+  gap: clamp(12px, 1.3vw, 18px);
 }
 
 .player-left {
@@ -38,10 +38,11 @@
 .player-art {
   width: var(--p-art-size);
   height: var(--p-art-size);
-  border-radius: 8px;
+  border-radius: 10px;
   object-fit: cover;
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
   flex-shrink: 0;
   display: block;
 }
@@ -49,10 +50,11 @@
 .player-art-placeholder {
   width: var(--p-art-size);
   height: var(--p-art-size);
-  border-radius: 8px;
+  border-radius: 10px;
   flex-shrink: 0;
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,7 +76,8 @@
 }
 
 .player-info:hover .player-title {
-  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .player-title {
@@ -115,21 +118,22 @@
 .player-controls-right {
   display: flex;
   align-items: center;
-  gap: clamp(5px, 0.5vw, 8px);
+  gap: clamp(6px, 0.55vw, 9px);
 }
 
 .p-btn {
   width: var(--p-btn-size);
   height: var(--p-btn-size);
-  border-radius: 50%;
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
-  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   flex-shrink: 0;
 }
 
@@ -139,16 +143,24 @@
 }
 
 .p-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-dim);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.p-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border);
 }
 
 .p-btn.main {
   width: var(--p-main-btn-size);
   height: var(--p-main-btn-size);
+  border-radius: 10px;
   background: var(--accent);
-  color: var(--bg);
-  border: none;
+  color: var(--text-on-accent);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .p-btn.main svg {
@@ -157,7 +169,9 @@
 }
 
 .p-btn.main:hover {
-  background: #ccc;
+  background: var(--accent-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
 }
 
 @keyframes player-spin {
@@ -173,16 +187,17 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   cursor: pointer;
   position: relative;
 }
 
 .player-progress-bar {
   width: 100%;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
+  height: 8px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
   overflow: visible;
   position: relative;
 }
@@ -191,7 +206,7 @@
   height: 100%;
   width: 0%;
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: 999px;
   will-change: width;
   position: relative;
   z-index: 2;
@@ -200,13 +215,14 @@
 .player-progress-fill::after {
   content: '';
   position: absolute;
-  right: -4px;
+  right: -5px;
   top: 50%;
   transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
 }
 
 .player-progress-ghost {
@@ -215,9 +231,9 @@
   left: 0;
   height: 100%;
   width: 0%;
-  background: var(--accent);
-  opacity: 0.25;
-  border-radius: 2px;
+  background: var(--accent-alt);
+  opacity: 0.45;
+  border-radius: 999px;
   z-index: 1;
   pointer-events: none;
   display: none;
@@ -226,10 +242,11 @@
 .player-progress-livedot {
   position: absolute;
   top: 50%;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--accent);
+  border: 1.5px solid var(--border);
   transform: translate(-50%, -50%);
   z-index: 4;
   pointer-events: none;
@@ -239,14 +256,15 @@
 
 .player-progress-livetime {
   position: absolute;
-  top: -26px;
+  top: -28px;
   transform: translateX(-50%);
   padding: 2px 6px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 6px;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -256,12 +274,13 @@
 
 .player-progress-tooltip {
   position: absolute;
-  top: -26px;
+  top: -28px;
   transform: translateX(-50%);
   padding: 2px 6px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 6px;
   font-size: 11px;
   color: var(--text-primary);
   white-space: nowrap;
@@ -288,7 +307,8 @@
 
 .player-time {
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 500;
+  color: var(--text-secondary);
   display: flex;
   justify-content: space-between;
   line-height: 1;
@@ -297,15 +317,16 @@
 .shuffle-btn {
   width: var(--p-btn-size);
   height: var(--p-btn-size);
-  border-radius: 50%;
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
-  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   flex-shrink: 0;
 }
 
@@ -315,8 +336,15 @@
 }
 
 .shuffle-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text-primary);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.shuffle-btn.active {
+  background: var(--accent-alt);
+  color: var(--text-on-accent);
 }
 
 /* Volume control */
@@ -327,12 +355,13 @@
 
 .vol-popup {
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: 10px;
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
@@ -361,59 +390,61 @@
 .vol-slider {
   writing-mode: vertical-lr;
   direction: rtl;
-  width: 4px;
+  width: 6px;
   height: 80px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--border);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
   cursor: pointer;
   margin: 0;
-  border-radius: 2px;
+  border-radius: 999px;
 }
 
 .vol-slider::-webkit-slider-runnable-track {
-  width: 4px;
+  width: 6px;
   height: 100%;
   background: transparent;
-  border-radius: 2px;
+  border-radius: 999px;
 }
 
 .vol-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
-  border: none;
-  margin-left: -4px;
+  border: 1.5px solid var(--border);
+  margin-left: -5px;
   cursor: pointer;
 }
 
 .vol-slider::-moz-range-track {
-  width: 4px;
+  width: 6px;
   height: 100%;
   background: transparent;
-  border-radius: 2px;
+  border-radius: 999px;
   border: none;
 }
 
 .vol-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
-  border: none;
+  border: 1.5px solid var(--border);
   cursor: pointer;
 }
 
 .vol-slider::-moz-range-progress {
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: 999px;
 }
 
 .vol-pct {
   font-size: 11px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text-primary);
   margin-top: 6px;
 }
 

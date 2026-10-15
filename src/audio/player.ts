@@ -78,9 +78,7 @@ class AudioPlayer {
     if (this.shuffleBtn) {
       this.shuffleBtn.addEventListener('click', () => {
         this.isShuffle = !this.isShuffle;
-        if (this.shuffleBtn) {
-          this.shuffleBtn.style.color = this.isShuffle ? 'var(--accent)' : 'var(--text-muted)';
-        }
+        this.shuffleBtn?.classList.toggle('active', this.isShuffle);
         sfx.play('switch');
       });
     }
@@ -280,7 +278,7 @@ class AudioPlayer {
     }
     this.queueIdx = 0;
     this.isShuffle = true;
-    if (this.shuffleBtn) this.shuffleBtn.style.color = 'var(--accent)';
+    this.shuffleBtn?.classList.add('active');
   }
 
   startProgressPolling(): void {

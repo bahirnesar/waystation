@@ -393,7 +393,7 @@ class UIPanels {
 
     const trackGenres = getTrackGenres(track);
     const genreBadgesHtml = trackGenres
-      .map(g => `<span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${escapeHtml(g)}</span>`)
+      .map(g => `<span class="badge">${escapeHtml(g)}</span>`)
       .join('');
 
     const linkUrl = track.id ? `https://www.youtube.com/watch?v=${track.id}` : '#';
@@ -406,8 +406,8 @@ class UIPanels {
             <div class="detail-track-name">${escapeHtml(track.title)}</div>
             <div class="detail-artist-name">${escapeHtml(track.artist)}</div>
             <div class="detail-meta">
-              <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${escapeHtml(countryName)}</span>
-              <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">${track.year}</span>
+              <span class="badge badge--accent">${escapeHtml(countryName)}</span>
+              <span class="badge">${track.year}</span>
               ${genreBadgesHtml}
             </div>
             <div style="display:flex;align-items:center;margin-top:6px;gap:6px;">

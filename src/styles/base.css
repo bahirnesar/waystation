@@ -1,16 +1,21 @@
 :root {
   --font: "IBM Plex Mono", monospace;
-  --bg: #000000;
-  --bg-surface: #0a0a0a;
-  --bg-elevated: #111111;
-  --border: #1e1e1e;
-  --text-primary: #e8e8e8;
-  --text-secondary: #a8a8a8;
-  --text-muted: #7e7e7e;
-  --accent: #ffffff;
-  --accent-dim: rgba(255,255,255,0.08);
-  --col-neutral: #b8b8b8;
-  --col-neutral-dim: rgba(255,255,255,0.06);
+  --bg: #FAF6F0;
+  --bg-surface: #FFFDF9;
+  --bg-elevated: #F4EBE1;
+  --border: #1E1B18;
+  --text-primary: #1E1B18;
+  --text-secondary: #4A423B;
+  --text-muted: #786E65;
+  --text-on-accent: #1E1B18;
+  --accent: #F4977C;
+  --accent-alt: #F7B587;
+  --accent-dim: #FDE4DC;
+  --shadow-sm: 2px 2px 0px var(--border);
+  --shadow-md: 3px 3px 0px var(--border);
+  --shadow-lg: 4px 4px 0px var(--border);
+  --col-neutral: #4A423B;
+  --col-neutral-dim: #E8DDD1;
   --col-sc-brand: #FF8C1A;
   --col-bc-brand: #1FA0A0;
   --col-yt-brand: #E53935;
@@ -31,6 +36,27 @@
   --col-td-dim: var(--col-neutral-dim);
 }
 
+body.dark-mode {
+  --bg: #080707;
+  --bg-surface: #2B2623;
+  --bg-elevated: #1E1A18;
+  --border: #000000;
+  --shadow-sm: 2px 2px 0px #000000;
+  --shadow-md: 3px 3px 0px #000000;
+  --shadow-lg: 4px 4px 0px #000000;
+  --text-primary: #FAF6F0;
+  --text-secondary: #D4C8BC;
+  --text-muted: #9A8E82;
+  --text-on-accent: #1E1B18;
+  --accent: #F4977C;
+  --accent-alt: #F7B587;
+  --accent-dim: #3A2C27;
+  --col-neutral: #D4C8BC;
+  --col-neutral-dim: #2B2623;
+  background-color: var(--bg);
+  background-image: none;
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -41,7 +67,9 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(30, 27, 24, 0.22) 1.25px, transparent 1.25px);
+  background-size: 22px 22px;
   touch-action: none;
 }
 
