@@ -490,6 +490,25 @@ class GlobeScene {
     this.activeRing = createRing(0xE84A3A, 1.9, 0.16);
   }
 
+  setTracks(tracks: Track[]): void {
+    this.allTracks = tracks;
+    this.N = tracks.length;
+    if (this.dotsMesh && this.globeGroup) {
+      this.globeGroup.remove(this.dotsMesh);
+      this.dotsGeo?.dispose();
+      this.dotsMat?.dispose();
+    }
+    this.createTrackDots();
+    this.trackScreenPos = [];
+    for (let i = 0; i < this.N; i++) {
+      this.trackScreenPos.push({ x: 0, y: 0, visible: false });
+    }
+    this.activeTrackIdx = -1;
+    if (this.activeRing) this.activeRing.visible = false;
+    if (this.hoverRing) this.hoverRing.visible = false;
+    this._projectionDirty = true;
+  }
+
   positionMarkerRing(ring: THREE.Mesh | null, trackIdx: number): void {
     if (!ring) return;
     if (trackIdx < 0 || trackIdx >= this.N) {

@@ -23,6 +23,7 @@ const ICON_TARGETS: Record<string, string> = {
   '#playerArt': ICON_MUSIC,
   '#infoBtn': ICON_INFO,
   '.sector-btn-icon': ICON_HEXAGON,
+  '.room-btn-icon': ICON_BROADCAST,
 };
 
 export function initIcons(): void {

@@ -4,10 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>OSTALGIE</title>
+  <title>WAYSTATION</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500;600&display=swap"
@@ -84,7 +82,7 @@
 <body>
 
   <!-- Initial Loading Screen -->
-  <div id="loading-screen" aria-label="Loading Ostalgie">
+  <div id="loading-screen" aria-label="Loading Waystation">
     <div class="loading-progress-bar">
       <div class="loading-progress-bar-fill"></div>
     </div>
@@ -118,17 +116,16 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="logo" id="logoBtn" title="Reset Camera to Global Orbit">
-      <svg class="logo-mark" width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1" />
-        <circle cx="12" cy="12" r="2" fill="currentColor" />
-        <line x1="12" y1="1.5" x2="12" y2="7" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
-        <line x1="12" y1="17" x2="12" y2="22.5" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
-        <line x1="1.5" y1="12" x2="7" y2="12" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
-        <line x1="17" y1="12" x2="22.5" y2="12" stroke="currentColor" stroke-width="0.8" opacity="0.4" />
+    <div class="logo" id="logoBtn" title="Switch or Create Room">
+      <svg class="logo-mark" width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="8.5" fill="#FFFDF9" stroke="#1E1B18" stroke-width="5" />
       </svg>
-      <span class="logo-text" id="headerTitle">OSTALGIE</span>
+      <span class="logo-text" id="headerTitle">WAYSTATION</span>
     </div>
+
+    <button class="room-view-btn" id="roomViewBtn" type="button" title="Reset Camera &amp; Start Autopilot">
+      <span class="room-view-text" id="roomViewTitle">OSTALGIE</span>
+    </button>
 
     <div class="nav-stats">
       <div class="nav-stat"><span class="nav-stat-label">Tracks</span><span class="nav-stat-value" id="hudTracks">1,080</span></div>
@@ -154,7 +151,9 @@
       <div class="sr-body" id="srBody"></div>
     </div>
 
-    <!-- Replaced Tour button with Stations button -->
+    <!-- Room, Stations & Info Buttons -->
+    <button class="sector-btn" id="roomPanelBtn" title="Room"><span class="btn-icon room-btn-icon"></span>
+      Room</button>
     <button class="sector-btn" id="sectorBtn" title="Manage Stations"><span class="btn-icon sector-btn-icon"></span>
       Stations</button>
     <button class="info-btn" id="infoBtn" title="Info & Controls"></button>

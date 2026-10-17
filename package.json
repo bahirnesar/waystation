@@ -1,26 +1,28 @@
 {
-  "name": "ostalgie-music-globe",
+  "name": "waystation",
   "version": "1.0.0",
   "type": "module",
-  "description": "Global Radio - Music player",
+  "description": "Waystation - Collaborative 3D Music Player & Playlist Visualiser",
   "scripts": {
     "dev": "vite --host --port 5555",
     "build": "tsc && vite build",
     "preview": "vite preview --host --port 5555",
+    "deploy": "npm run build && wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.67.0",
+    "@cloudflare/workers-types": "^5.20261104.1",
     "@types/three": "^0.186.0",
     "typescript": "^7.0.2",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "wrangler": "^4.157.0"
   },
   "keywords": [
     "threejs",
-    "music-globe",
-    "ostalgie",
     "audio-player"
   ],
   "author": "Bahir Nesar",

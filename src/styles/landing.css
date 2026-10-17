@@ -1,0 +1,389 @@
+/* ── LANDING MODAL & ROOM STATUS BAR ───────────────── */
+.room-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.room-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6EC6B8;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.room-status-dot.local {
+  background: var(--accent-alt);
+}
+
+.room-action-btn {
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 5px;
+  border: 1.2px solid var(--border);
+  background: var(--accent-dim);
+  color: var(--text-primary);
+  font: 600 9px var(--font);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.room-action-btn:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.room-action-btn.active {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* ── LANDING MODAL OVERLAY ────────────────────────── */
+.landing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(30, 27, 24, 0.45);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.landing-overlay.open {
+  display: flex;
+}
+
+.landing-card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 2.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.landing-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.landing-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.landing-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.landing-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── IDENTITY BAR ─────────────────────────────────── */
+.landing-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.identity-orb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.12s;
+}
+
+.identity-orb:hover {
+  transform: scale(1.1);
+}
+
+.identity-input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  font: 500 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.identity-colors {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.color-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.color-swatch:hover,
+.color-swatch.active {
+  opacity: 1;
+  transform: scale(1.18);
+}
+
+/* ── FEATURED OSTALGIE ARCHIVE CARD ───────────────── */
+.featured-room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--accent-alt);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
+}
+
+.featured-room-card:hover {
+  background: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.featured-room-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.featured-room-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-on-accent);
+  opacity: 0.85;
+}
+
+.featured-room-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-on-accent);
+}
+
+.featured-room-desc {
+  font-size: 11px;
+  color: var(--text-on-accent);
+  opacity: 0.9;
+}
+
+.featured-room-cta {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+/* ── PRIMARY ROOM ACTIONS ─────────────────────────── */
+.landing-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.landing-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+}
+
+.landing-action-card:hover {
+  background: var(--accent-dim);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.landing-action-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.landing-action-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ── JOIN BY CODE / URL ───────────────────────────── */
+.landing-join-row {
+  display: flex;
+  gap: 8px;
+}
+
+.landing-join-input {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  font: 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.landing-join-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font: 600 11px var(--font);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.landing-join-btn:hover {
+  background: var(--accent-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── SAVED ROOMS LIST ─────────────────────────────── */
+.landing-saved-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.saved-rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.saved-room-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.saved-room-row:hover {
+  background: var(--accent-dim);
+}
+
+.saved-room-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.saved-room-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.saved-room-remove {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+}
+
+.saved-room-remove:hover {
+  color: var(--text-primary);
+}
+

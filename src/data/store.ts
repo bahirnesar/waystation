@@ -1,8 +1,8 @@
 // ─── DATA STORE & NORMALIZATION ───
-import { Track, Cluster, Station, AppState, LocationHub } from '../types/index';
+import { Track, Cluster, Station, AppState, LocationHub, RoomState } from '../types/index';
 import { TOP_LEVEL_GENRES, getTrackGenres, trackHasGenre } from './genres';
 
-// Raw inputs from window globals
+// Raw inputs from window globals (Permanent Ostalgie Archive)
 const rawLocations: LocationHub[] = window.LOCATIONS_DATA || [];
 export const rawTracks: Track[] = window.TRACKS_DATA || [];
 const rawStations: Station[] = window.STATIONS_DATA || [];
@@ -11,9 +11,13 @@ const rawStations: Station[] = window.STATIONS_DATA || [];
 export const locationMap = new Map<string, LocationHub>();
 rawLocations.forEach(loc => locationMap.set(loc.id, loc));
 
-export const allTracks: Track[] = rawTracks;
-export const trackMap = new Map<string, Track>();
-allTracks.forEach(t => trackMap.set(t.id, t));
+export const ostalgieTracks: Track[] = rawTracks;
+export const ostalgieTrackMap = new Map<string, Track>();
+ostalgieTracks.forEach(t => ostalgieTrackMap.set(t.id, t));
+
+// Mutable active room references (defaults to Ostalgie until RoomAdapter loads)
+export let allTracks: Track[] = ostalgieTracks;
+export const trackMap = new Map<string, Track>(ostalgieTrackMap);
 
 export function standardizeCountry(name?: string): string {
   if (!name) return '';
@@ -201,14 +205,14 @@ export function trackMatchesSearch(t: Track, query: string): boolean {
     (t.genres ? t.genres.some(g => g.toLowerCase().includes(q)) : false);
 }
 
-// 5. Hydrate stations (from explicit trackIds for custom stations, or derived by genre)
-export const stations: Station[] = (rawStations.length ? rawStations : [
+// 5. Hydrate Ostalgie stations (from explicit trackIds for custom stations, or derived by genre)
+export const ostalgieStations: Station[] = (rawStations.length ? rawStations : [
   { id: 'all', name: 'All Tracks' },
   ...TOP_LEVEL_GENRES.map(name => ({ id: name.toLowerCase(), name }))
 ]).map(s => {
   const stTracks = s.trackIds?.length
-    ? s.trackIds.map(id => trackMap.get(id)).filter((t): t is Track => Boolean(t))
-    : (s.tracks || (s.id === 'all' ? allTracks : allTracks.filter(t => trackHasGenre(t, s.name))));
+    ? s.trackIds.map(id => ostalgieTrackMap.get(id)).filter((t): t is Track => Boolean(t))
+    : (s.tracks || (s.id === 'all' ? ostalgieTracks : ostalgieTracks.filter(t => trackHasGenre(t, s.name))));
 
   const uniqueArtists = new Set(stTracks.map(t => (t.artist || '').trim().toLowerCase()));
 
@@ -220,10 +224,16 @@ export const stations: Station[] = (rawStations.length ? rawStations : [
   };
 });
 
+export let stations: Station[] = ostalgieStations;
+
 const defaultStation = stations.find(s => s.id === 'all') || stations[0];
 const validYears = allTracks.map(t => t.year).filter((y): y is number => typeof y === 'number' && y > 1900);
 
 export const state: AppState = {
+  roomId: 'ostalgie',
+  roomMode: 'shared',
+  roomName: 'OSTALGIE',
+  isReadOnly: true,
   currentStationId: defaultStation?.id || 'all',
   currentStationTracks: defaultStation?.tracks || allTracks,
   rangeYearL: validYears.length ? Math.min(...validYears) : 1967,
@@ -231,3 +241,70 @@ export const state: AppState = {
   searchQuery: '',
   autoSpin: true
 };
+
+/**
+ * Hydrate active store state from a RoomState snapshot (LocalRoomAdapter or SharedRoomAdapter).
+ */
+export function applyRoomStateToStore(room: RoomState): void {
+  // Normalize tracks
+  const hydratedTracks = room.tracks.map((t, idx) => {
+    if (t.lat === undefined || t.lng === undefined) {
+      // Deterministic Fibonacci sphere fallback for imported tracks without geo coords
+      const phi = Math.acos(1 - (2 * (idx + 0.5)) / Math.max(1, room.tracks.length));
+      const theta = Math.PI * (1 + Math.sqrt(5)) * idx;
+      t.lat = 90 - (phi * 180) / Math.PI;
+      t.lng = ((theta * 180) / Math.PI) % 360 - 180;
+    }
+    if (!t.genres) t.genres = getTrackGenres(t);
+    if (!t.displayCountry) t.displayCountry = getDisplayCountry(t);
+    return t;
+  });
+
+  allTracks = hydratedTracks;
+  trackMap.clear();
+  for (const t of allTracks) {
+    trackMap.set(t.id, t);
+  }
+
+  const rawRoomStations = room.stations.length
+    ? room.stations
+    : [{ id: 'all', name: 'All Tracks', trackIds: [] }];
+
+  const hasAll = rawRoomStations.some(s => s.id === 'all');
+  const fullStationList = hasAll
+    ? rawRoomStations
+    : [{ id: 'all', name: 'All Tracks', trackIds: [] }, ...rawRoomStations];
+
+  stations = fullStationList.map(s => {
+    let stTracks: Track[];
+    if (s.id === 'all') {
+      stTracks = allTracks;
+    } else if (s.tracks && s.tracks.length > 0 && room.readOnly) {
+      stTracks = s.tracks;
+    } else if (s.trackIds && s.trackIds.length > 0) {
+      stTracks = s.trackIds.map(id => trackMap.get(id)).filter((t): t is Track => Boolean(t));
+    } else {
+      stTracks = allTracks.filter(t => t.stationIds?.includes(s.id) || trackHasGenre(t, s.name));
+    }
+    const uniqueArtists = new Set(stTracks.map(t => (t.artist || '').trim().toLowerCase()));
+    return {
+      ...s,
+      tracks: stTracks,
+      trackCount: stTracks.length,
+      artistCount: uniqueArtists.size
+    };
+  });
+
+  state.roomId = room.id;
+  state.roomMode = room.mode;
+  state.roomName = room.name;
+  state.isReadOnly = Boolean(room.readOnly);
+
+  const activeSt = stations.find(s => s.id === state.currentStationId) || stations[0];
+  state.currentStationId = activeSt?.id || 'all';
+  state.currentStationTracks = activeSt?.tracks || allTracks;
+
+  const yrs = allTracks.map(t => t.year).filter((y): y is number => typeof y === 'number' && y > 1900);
+  state.rangeYearL = yrs.length ? Math.min(...yrs) : 1900;
+  state.rangeYearR = yrs.length ? Math.max(...yrs) : 2030;
+}

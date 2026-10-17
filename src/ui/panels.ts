@@ -6,7 +6,7 @@ import { sfx } from '../audio/sfx';
 import { Track, Cluster, Station } from '../types/index';
 
 export interface UIPanelsInitOptions {
-  stations: Station[];
+  stations: () => Station[];
   currentStationId: () => string;
   onSelectStation?: (sid: string) => void;
   onSelectTrack?: (track: Track) => void;
@@ -109,12 +109,12 @@ class UIPanels {
         this.detailPanel?.classList.remove('open');
         this.searchResults?.classList.remove('open');
         this.infoPanel?.classList.remove('open');
-        this.renderStationList(stations, this.sectorSearchInput?.value || '', currentStationId(), onSelectStation);
+        this.renderStationList(stations(), this.sectorSearchInput?.value || '', currentStationId(), onSelectStation);
       }
     });
 
     this.sectorSearchInput?.addEventListener('input', e => {
-      this.renderStationList(stations, (e.target as HTMLInputElement).value, currentStationId(), onSelectStation);
+      this.renderStationList(stations(), (e.target as HTMLInputElement).value, currentStationId(), onSelectStation);
     });
 
     this.sectorList?.addEventListener('click', e => {

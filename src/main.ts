@@ -1,15 +1,18 @@
-// ─── OSTALGIE APPLICATION ORCHESTRATOR ───
+// ─── WAYSTATION APPLICATION ORCHESTRATOR ───
 import * as THREE from 'three';
 import './styles/main.css';
 
-import { allTracks, allClusters, stations, state, trackMatchesSearch } from './data/store';
+import { allTracks, allClusters, stations, state, trackMatchesSearch, applyRoomStateToStore } from './data/store';
+import { getCuratedRoomConfig } from './data/curated-rooms';
+import { LocalRoomAdapter, RoomAdapter, SharedRoomAdapter } from './data/room-adapter';
 import { globe } from './scene/globe';
 import { controls } from './scene/controls';
 import { player } from './audio/player';
 import { sfx } from './audio/sfx';
 import { panels } from './ui/panels';
+import { landing } from './ui/landing';
 import { initIcons } from './ui/icons';
-import { Track } from './types/index';
+import { RoomState, Track } from './types/index';
 
 const initStartTime = performance.now();
 
@@ -22,6 +25,33 @@ if (!canvasContainer) {
   throw new Error('Canvas container element #canvas-container not found');
 }
 globe.init(canvasContainer, allTracks);
+
+let activeAdapter: RoomAdapter | null = null;
+let unsubscribeAdapter: (() => void) | null = null;
+
+function getRoomDisplayName(): string {
+  const curated = getCuratedRoomConfig(state.roomId);
+  if (curated) return curated.name.toUpperCase();
+  if (state.roomMode === 'local') return 'PRIVATE SESSION';
+  return state.roomId.toUpperCase();
+}
+
+function updateHeaderTitle(): void {
+  const headerTitle = document.getElementById('headerTitle');
+  if (headerTitle) {
+    headerTitle.textContent = 'WAYSTATION';
+  }
+
+  const roomViewTitle = document.getElementById('roomViewTitle');
+  if (!roomViewTitle) return;
+  const station = stations.find(s => s.id === state.currentStationId);
+  const roomName = getRoomDisplayName();
+  if (!station || state.currentStationId === 'all') {
+    roomViewTitle.textContent = roomName;
+  } else {
+    roomViewTitle.textContent = `${roomName} : ${station.name.toUpperCase()}`;
+  }
+}
 
 function syncVisuals(): void {
   const visible = globe.updateGlobeVisuals({
@@ -42,6 +72,17 @@ function selectTrack(track?: Track | null): void {
   controls.flyTo(track.lat || 0, track.lng || 0, 195);
   panels.openDetailPanel(track, allTracks, allClusters, selectTrack);
   player.playTrack(track);
+
+  activeAdapter?.updateNowPlaying({
+    trackId: track.id,
+    title: track.title,
+    artist: track.artist,
+    artworkUrl: track.thumbnail,
+    stationId: state.currentStationId,
+    isPlaying: true,
+    positionMs: 0,
+    updatedAt: Date.now()
+  });
 }
 
 // 3. Setup Audio Player
@@ -51,6 +92,16 @@ player.init({
     if (panels.isDetailOpen() && panels.currentDetailTrackId !== track.id) {
       panels.openDetailPanel(track, allTracks, allClusters, selectTrack);
     }
+    activeAdapter?.updateNowPlaying({
+      trackId: track.id,
+      title: track.title,
+      artist: track.artist,
+      artworkUrl: track.thumbnail,
+      stationId: state.currentStationId,
+      isPlaying: true,
+      positionMs: 0,
+      updatedAt: Date.now()
+    });
   },
   onShowDetail: (track: Track) => {
     panels.openDetailPanel(track, allTracks, allClusters, selectTrack);
@@ -72,7 +123,7 @@ controls.init({
   },
   onHoverChange: (idx: number) => {
     globe.setHoverRing(idx);
-    if (idx !== -1) {
+    if (idx !== -1 && allTracks[idx]) {
       const sp = globe.trackScreenPos[idx];
       panels.showTooltip(allTracks[idx], sp.x, sp.y);
     } else {
@@ -91,7 +142,10 @@ controls.init({
   onTogglePlayPause: () => player.togglePlayPause(),
   onSkipNext: () => player.skipNext(),
   onSkipPrev: () => player.skipPrev(),
-  onCloseAllPanels: () => panels.closeAllPanels(),
+  onCloseAllPanels: () => {
+    panels.closeAllPanels();
+    landing.close();
+  },
   onToggleBorders: () => panels.toggleBorders(),
   onToggleStarfield: () => panels.toggleStarfield(),
   onToggleSounds: () => panels.toggleSounds()
@@ -109,34 +163,23 @@ function switchToStation(sid: string): void {
   state.currentStationId = sid;
   state.currentStationTracks = station.tracks || allTracks;
 
-  // Sound feedback
   sfx.play('switch', 0.35);
+  updateHeaderTitle();
 
-  // Update header title
-  const headerTitle = document.getElementById('headerTitle');
-  if (headerTitle) {
-    headerTitle.textContent = sid === 'all' ? 'OSTALGIE' : `OSTALGIE : ${station.name.toUpperCase()}`;
-  }
-
-  // Reset & shuffle queue
   player.setQueue(state.currentStationTracks);
   player.shuffleQueue();
   if (player.queue.length > 0) {
     player.playTrack(player.queue[0]);
   }
 
-  // Update stations list UI
   panels.renderStationList(stations, '', state.currentStationId, switchToStation);
-
-  // Reset camera
   controls.resetCamera();
-
   syncVisuals();
 }
 
-// 7. Setup Panels (Detail, Stations, Search, Info)
+// 6. Setup Panels (Detail, Stations, Search, Info)
 panels.init({
-  stations,
+  stations: () => stations,
   currentStationId: () => state.currentStationId,
   onSelectStation: switchToStation,
   onSelectTrack: selectTrack,
@@ -165,11 +208,89 @@ panels.init({
   onResetCam: () => controls.resetCamera()
 });
 
-// 7. Initial Visuals & Stats
-syncVisuals();
-panels.renderStationList(stations, '', state.currentStationId, switchToStation);
+// 7. Room Routing & Adapter Lifecycle
+function handleRoomStateUpdate(room: RoomState, rebuildScene = false): void {
+  const prevCount = allTracks.length;
+  const prevRoomId = state.roomId;
+  applyRoomStateToStore(room);
 
-// 10. Primary Animation Loop
+  if (rebuildScene || prevCount !== allTracks.length || prevRoomId !== room.id) {
+    globe.setTracks(allTracks);
+  }
+
+  updateHeaderTitle();
+  landing.updateTopBarStatus(room);
+  panels.renderStationList(stations, '', state.currentStationId, switchToStation);
+  player.setQueue(state.currentStationTracks);
+  syncVisuals();
+}
+
+async function mountRoute(pathname: string, pushHistory = false): Promise<void> {
+  if (pushHistory && window.location.pathname !== pathname) {
+    window.history.pushState({}, '', pathname);
+  }
+
+  let targetAdapter: RoomAdapter;
+  let showLanding = false;
+
+  if (pathname === '/local') {
+    targetAdapter = new LocalRoomAdapter();
+  } else {
+    const match = pathname.match(/^\/r\/([^/]+)$/i);
+    if (match) {
+      targetAdapter = new SharedRoomAdapter(decodeURIComponent(match[1]));
+    } else {
+      // Root '/' opens the Landing Modal on top of the permanent Ostalgie room backdrop
+      targetAdapter = new SharedRoomAdapter('ostalgie');
+      showLanding = true;
+    }
+  }
+
+  if (
+    !activeAdapter ||
+    activeAdapter.roomId !== targetAdapter.roomId ||
+    activeAdapter.mode !== targetAdapter.mode
+  ) {
+    unsubscribeAdapter?.();
+    activeAdapter?.dispose();
+    activeAdapter = targetAdapter;
+
+    const initialRoom = await activeAdapter.load();
+    handleRoomStateUpdate(initialRoom, true);
+
+    unsubscribeAdapter = activeAdapter.subscribe(updatedRoom => {
+      handleRoomStateUpdate(updatedRoom, false);
+    });
+  } else {
+    landing.updateTopBarStatus(activeAdapter.getState());
+  }
+
+  if (showLanding) {
+    landing.open();
+  } else {
+    landing.close();
+  }
+}
+
+landing.init({
+  onNavigate: (path: string) => {
+    void mountRoute(path, true);
+  },
+  onPublishLocalRoom: async () => {
+    if (!activeAdapter || activeAdapter.mode !== 'local') return;
+    const slug = await activeAdapter.publishToSharedRoom();
+    await mountRoute(`/r/${slug}`, true);
+  }
+});
+
+window.addEventListener('popstate', () => {
+  void mountRoute(window.location.pathname, false);
+});
+
+// Boot initial route
+void mountRoute(window.location.pathname, false);
+
+// 8. Primary Animation Loop
 const clock = new THREE.Clock();
 const findClosestDotCallback = (mx: number, my: number) => globe.findClosestDot(mx, my);
 
@@ -218,6 +339,8 @@ function cleanup(): void {
     cancelAnimationFrame(animId);
     animId = null;
   }
+  unsubscribeAdapter?.();
+  activeAdapter?.dispose();
   globe.dispose();
   player.dispose();
   sfx.dispose();

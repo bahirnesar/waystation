@@ -10,6 +10,8 @@ plan/
 *.local
 .env
 .env.*
+.dev.vars*
+.wrangler/
 
 # Logs
 logs

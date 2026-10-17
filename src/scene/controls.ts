@@ -99,11 +99,14 @@ class SceneControls {
       onToggleSounds
     });
 
-    const logoBtn = document.getElementById('logoBtn');
-    if (logoBtn) {
-      logoBtn.addEventListener('click', () => {
+    const roomViewBtn = document.getElementById('roomViewBtn');
+    if (roomViewBtn) {
+      roomViewBtn.addEventListener('click', () => {
         sfx.play('transition');
         this.resetCamera();
+        if (this.onAutopilotChange) {
+          this.onAutopilotChange(true);
+        }
       });
     }
   }
