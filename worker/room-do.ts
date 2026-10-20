@@ -377,6 +377,33 @@ export class WaystationRoom extends DurableObject<Env> {
       return Response.json(state);
     }
 
+    if (request.method === 'POST' && action === '/track-patch') {
+      const body = (await request.json().catch(() => ({}))) as {
+        trackId?: string;
+        patch?: Partial<Track>;
+      };
+      if (body.trackId && body.patch) {
+        const row = this.sql
+          .exec<{ id: string; canonical_key: string; data: string }>(
+            'SELECT id, canonical_key, data FROM tracks WHERE id = ?',
+            body.trackId
+          )
+          .toArray()[0];
+        if (row) {
+          const track = JSON.parse(row.data) as Track;
+          const updatedTrack: Track = { ...track, ...body.patch };
+          const cKey = this.canonicalKey(updatedTrack);
+          this.sql.exec(
+            'UPDATE tracks SET canonical_key = ?, data = ? WHERE id = ?',
+            cKey,
+            JSON.stringify(updatedTrack),
+            body.trackId
+          );
+        }
+      }
+      return Response.json({ ok: true });
+    }
+
     return new Response('Not Found', { status: 404 });
   }
 

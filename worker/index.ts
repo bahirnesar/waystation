@@ -1,10 +1,21 @@
 import { Env, WaystationRoom } from './room-do';
+import {
+  handleBandcampStream,
+  handleOptions,
+  handleStreamPipe,
+  handleYtResolve
+} from './streams';
 
 export { WaystationRoom };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    // CORS preflight for API requests
+    if (request.method === 'OPTIONS' && url.pathname.startsWith('/api/')) {
+      return handleOptions();
+    }
 
     // Health check endpoint
     if (url.pathname === '/api/health') {
@@ -13,6 +24,19 @@ export default {
         service: 'waystation-worker',
         timestamp: Date.now()
       });
+    }
+
+    // Stream proxy & audio resolution endpoints
+    if (url.pathname === '/api/bc-stream') {
+      return handleBandcampStream(request);
+    }
+
+    if (url.pathname === '/api/stream-pipe') {
+      return handleStreamPipe(request);
+    }
+
+    if (url.pathname === '/api/yt-resolve') {
+      return handleYtResolve(request, env);
     }
 
     // WebSocket upgrade for room presence: /ws/room/:roomId
@@ -51,4 +75,3 @@ export default {
     return new Response('Not Found', { status: 404 });
   }
 };
-
