@@ -35,11 +35,14 @@ const LOCAL_ROOM_KEY = 'local_room_v1';
 
 function openLocalDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
+    const req = indexedDB.open(IDB_NAME, 2);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(IDB_STORE)) {
         db.createObjectStore(IDB_STORE);
+      }
+      if (!db.objectStoreNames.contains('audio_blobs')) {
+        db.createObjectStore('audio_blobs');
       }
     };
     req.onsuccess = () => resolve(req.result);

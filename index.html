@@ -77,6 +77,8 @@
   <script src="/tracks_data.js"></script>
   <script src="/stations_data.js"></script>
   <script src="https://www.youtube.com/iframe_api" async></script>
+  <script src="https://w.soundcloud.com/player/api.js" async></script>
+  <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 </head>
 
 <body>
@@ -215,7 +217,7 @@
     <div class="player-right">
       <div class="player-info" id="playerInfo">
         <div class="player-title" id="playerTitle">No track selected</div>
-        <div class="player-artist" id="playerArtist"><span id="playerArtistText">Click a node to play</span></div>
+        <div class="player-artist" id="playerArtist"><span class="plat-dot" id="playerPlatDot"></span><span id="playerArtistText">Click a node to play</span></div>
       </div>
       <div class="player-progress" id="pProgress">
         <div class="player-time"><span id="pTime">0:00</span><span id="pDur">0:00</span></div>
@@ -248,10 +250,19 @@
     </div>
   </div>
 
-  <!-- Hidden YouTube player container -->
+  <!-- Hidden Media Player Containers (YouTube, SoundCloud, Spotify) -->
   <div id="yt-player-wrap"
     style="position:fixed;bottom:0;left:0;width:200px;height:200px;opacity:0.001;pointer-events:none;z-index:-10;">
     <div id="yt-frame"></div>
+  </div>
+  <div id="sc-player-wrap"
+    style="position:fixed;bottom:0;left:0;width:10px;height:10px;opacity:0.0001;pointer-events:none;z-index:-10;">
+    <iframe id="sc-frame" width="10" height="10" scrolling="no" frameborder="no" allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&amp;auto_play=false"></iframe>
+  </div>
+  <div id="spotify-player-wrap"
+    style="position:fixed;bottom:0;left:0;width:10px;height:10px;opacity:0.0001;pointer-events:none;z-index:-10;">
+    <div id="spotify-embed"></div>
   </div>
 
   <!-- 3D Canvas Container -->

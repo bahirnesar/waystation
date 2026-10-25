@@ -8,6 +8,8 @@ declare global {
     webkitAudioContext?: typeof AudioContext;
     onYouTubeIframeAPIReady?: () => void;
     YT?: typeof YT;
+    SC?: typeof SC;
+    onSpotifyIframeApiReady?: (IFrameAPI: SpotifyIframeApi) => void;
   }
 
   namespace YT {
@@ -53,6 +55,61 @@ declare global {
       loadVideoById(videoId: string | { videoId: string; startSeconds?: number }): void;
       cueVideoById(videoId: string | { videoId: string; startSeconds?: number }): void;
     }
+  }
+
+  namespace SC {
+    namespace Widget {
+      enum Events {
+        READY = 'ready',
+        PLAY = 'play',
+        PAUSE = 'pause',
+        FINISH = 'finish',
+        SEEK = 'seek',
+        ERROR = 'error',
+        PLAY_PROGRESS = 'playProgress',
+        LOAD_PROGRESS = 'loadProgress'
+      }
+    }
+    function Widget(iframe: string | HTMLIFrameElement): SCWidget;
+  }
+
+  interface SCWidget {
+    bind(event: string, callback: (...args: any[]) => void): void;
+    unbind(event: string): void;
+    load(url: string, options?: Record<string, any>): void;
+    play(): void;
+    pause(): void;
+    toggle(): void;
+    seekTo(milliseconds: number): void;
+    setVolume(volume: number): void;
+    getVolume(callback: (volume: number) => void): void;
+    getDuration(callback: (duration: number) => void): void;
+    getPosition(callback: (position: number) => void): void;
+    getSounds(callback: (sounds: any[]) => void): void;
+    getCurrentSound(callback: (sound: any) => void): void;
+    isPaused(callback: (paused: boolean) => void): void;
+  }
+
+  interface SpotifyIframeApi {
+    createController(
+      element: HTMLElement | null,
+      options: { width?: string | number; height?: string | number; uri: string },
+      callback: (controller: SpotifyEmbedController) => void
+    ): void;
+  }
+
+  interface SpotifyEmbedController {
+    loadUri(uri: string): void;
+    play(): void;
+    pause(): void;
+    resume(): void;
+    togglePlay(): void;
+    seek(seconds: number): void;
+    destroy(): void;
+    addListener(
+      event: 'ready' | 'playback_update',
+      callback: (data: any) => void
+    ): void;
   }
 }
 

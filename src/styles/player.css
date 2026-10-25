@@ -101,10 +101,26 @@
 
 .player-artist .plat-dot {
   display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+  background: var(--accent);
 }
 
 .player-artist.has-dot .plat-dot {
   display: inline-block;
+}
+
+@keyframes p-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.p-spin {
+  animation: p-spin 0.85s linear infinite;
+  display: block;
 }
 
 .player-controls {

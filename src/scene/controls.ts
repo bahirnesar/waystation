@@ -211,7 +211,7 @@ class SceneControls {
       }
 
       const target = e.target as HTMLElement | null;
-      if (target?.closest('.top-bar, .detail-panel, .player-bar, .info-panel, .search-results, .bottom-bar, .sector-panel')) return;
+      if (target?.closest('.top-bar, .detail-panel, .player-bar, .info-panel, .search-results, .bottom-bar, .sector-panel, .landing-overlay')) return;
       this.isDragging = true;
       this.isAnimatingCamera = false;
       this.isAnimatingGlobe = false;
@@ -250,7 +250,7 @@ class SceneControls {
 
     window.addEventListener('click', e => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest('.top-bar, .detail-panel, .player-bar, .info-panel, .search-results, .sector-panel')) return;
+      if (target?.closest('.top-bar, .detail-panel, .player-bar, .info-panel, .search-results, .sector-panel, .landing-overlay')) return;
 
       const clickDist = Math.hypot(e.clientX - this.dragStartPos.x, e.clientY - this.dragStartPos.y);
       if (this.hasDragged || clickDist > this.DRAG_THRESHOLD_PX) {

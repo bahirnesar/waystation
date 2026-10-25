@@ -105,7 +105,22 @@ player.init({
   },
   onShowDetail: (track: Track) => {
     panels.openDetailPanel(track, allTracks, allClusters, selectTrack);
-  }
+  },
+  onPlaybackStateChange: (playback) => {
+    if (playback.track) {
+      activeAdapter?.updateNowPlaying({
+        trackId: playback.track.id,
+        title: playback.track.title,
+        artist: playback.track.artist,
+        artworkUrl: playback.track.thumbnail,
+        stationId: state.currentStationId,
+        isPlaying: playback.isPlaying,
+        positionMs: Math.round(playback.positionMs),
+        updatedAt: Date.now()
+      });
+    }
+  },
+  getRoomId: () => activeAdapter?.roomId || state.roomId
 });
 player.setQueue(state.currentStationTracks);
 
@@ -246,6 +261,12 @@ async function mountRoute(pathname: string, pushHistory = false): Promise<void> 
     }
   }
 
+  if (showLanding) {
+    landing.open();
+  } else {
+    landing.close();
+  }
+
   if (
     !activeAdapter ||
     activeAdapter.roomId !== targetAdapter.roomId ||
@@ -254,6 +275,7 @@ async function mountRoute(pathname: string, pushHistory = false): Promise<void> 
     unsubscribeAdapter?.();
     activeAdapter?.dispose();
     activeAdapter = targetAdapter;
+    player.setRoomId(activeAdapter.roomId);
 
     const initialRoom = await activeAdapter.load();
     handleRoomStateUpdate(initialRoom, true);
@@ -263,12 +285,6 @@ async function mountRoute(pathname: string, pushHistory = false): Promise<void> 
     });
   } else {
     landing.updateTopBarStatus(activeAdapter.getState());
-  }
-
-  if (showLanding) {
-    landing.open();
-  } else {
-    landing.close();
   }
 }
 
@@ -287,8 +303,9 @@ window.addEventListener('popstate', () => {
   void mountRoute(window.location.pathname, false);
 });
 
-// Boot initial route
+// Boot initial route and open the landing page modal on initial load
 void mountRoute(window.location.pathname, false);
+landing.open();
 
 // 8. Primary Animation Loop
 const clock = new THREE.Clock();
