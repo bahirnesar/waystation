@@ -121,9 +121,11 @@ export class WaystationRoom extends DurableObject<Env> {
 
   private canonicalKey(t: Partial<Track>): string {
     if (t.ytId) return `yt:${t.ytId}`;
-    if (t.scUrl) return `sc:${t.scUrl.split('?')[0].toLowerCase()}`;
-    if (t.bcUrl) return `bc:${t.bcUrl.split('?')[0].toLowerCase()}`;
-    if (t.spotifyUrl) return `sp:${t.spotifyUrl.split('?')[0].toLowerCase()}`;
+    if (t.scUrl) return `sc:${t.scUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+    if (t.bcUrl) return `bc:${t.bcUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+    if (t.spotifyUrl) return `sp:${t.spotifyUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+    if (t.appleMusicUrl) return `am:${t.appleMusicUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+    if (t.localBlobKey) return `local:${t.localBlobKey}`;
     return `meta:${(t.artist || '').trim().toLowerCase()}|||${(t.title || '').trim().toLowerCase()}`;
   }
 
@@ -152,8 +154,16 @@ export class WaystationRoom extends DurableObject<Env> {
 
     for (const raw of incoming) {
       const cKey = this.canonicalKey(raw);
+      const metaKey = raw.artist && raw.title
+        ? `meta:${raw.artist.trim().toLowerCase()}|||${raw.title.trim().toLowerCase()}`
+        : cKey;
       const existingRow = this.sql
-        .exec<{ id: string; data: string }>('SELECT id, data FROM tracks WHERE id = ? OR canonical_key = ? LIMIT 1', raw.id, cKey)
+        .exec<{ id: string; data: string }>(
+          'SELECT id, data FROM tracks WHERE id = ? OR canonical_key = ? OR canonical_key = ? LIMIT 1',
+          raw.id,
+          cKey,
+          metaKey
+        )
         .toArray()[0];
 
       let finalTrack: Track;
@@ -171,6 +181,13 @@ export class WaystationRoom extends DurableObject<Env> {
           ...prev,
           ...raw,
           id: prev.id,
+          thumbnail: raw.thumbnail || prev.thumbnail,
+          ytId: raw.ytId || prev.ytId,
+          scUrl: raw.scUrl || prev.scUrl,
+          bcUrl: raw.bcUrl || prev.bcUrl,
+          spotifyUrl: raw.spotifyUrl || prev.spotifyUrl,
+          appleMusicUrl: raw.appleMusicUrl || prev.appleMusicUrl,
+          localBlobKey: raw.localBlobKey || prev.localBlobKey,
           stationIds: Array.from(stIds),
           addedByUserIds: Array.from(userIds)
         };
@@ -402,6 +419,49 @@ export class WaystationRoom extends DurableObject<Env> {
         }
       }
       return Response.json({ ok: true });
+    }
+
+    if (request.method === 'POST' && action === '/restore') {
+      const body = (await request.json().catch(() => ({}))) as {
+        stations?: Station[];
+        tracks?: Track[];
+        user?: UserProfile;
+      };
+      this.upsertContributor(body.user);
+
+      if (Array.isArray(body.stations)) {
+        this.sql.exec('DELETE FROM stations');
+        body.stations.forEach((s, idx) => {
+          this.sql.exec(
+            `INSERT INTO stations (id, name, color, created_by, import_url, track_ids, sort_order)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            s.id,
+            s.name,
+            s.color || '#F4977C',
+            s.createdBy || null,
+            s.importUrl || null,
+            JSON.stringify(s.trackIds || []),
+            idx
+          );
+        });
+      }
+
+      if (Array.isArray(body.tracks)) {
+        this.sql.exec('DELETE FROM tracks');
+        for (const t of body.tracks) {
+          const cKey = this.canonicalKey(t);
+          this.sql.exec(
+            'INSERT INTO tracks (id, canonical_key, data) VALUES (?, ?, ?)',
+            t.id,
+            cKey,
+            JSON.stringify(t)
+          );
+        }
+      }
+
+      const state = this.getRoomState(roomId);
+      this.broadcast({ type: 'room_mutated', state });
+      return Response.json(state);
     }
 
     return new Response('Not Found', { status: 404 });

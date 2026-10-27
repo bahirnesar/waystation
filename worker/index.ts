@@ -1,4 +1,5 @@
 import { Env, WaystationRoom } from './room-do';
+import { handleImport } from './importers';
 import {
   handleBandcampStream,
   handleOptions,
@@ -37,6 +38,10 @@ export default {
 
     if (url.pathname === '/api/yt-resolve') {
       return handleYtResolve(request, env);
+    }
+
+    if (url.pathname === '/api/import') {
+      return handleImport(request, env);
     }
 
     // WebSocket upgrade for room presence: /ws/room/:roomId
