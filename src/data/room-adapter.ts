@@ -22,6 +22,7 @@ export interface RoomAdapter {
   renameStation(stationId: string, name: string): Promise<void>;
   deleteStation(stationId: string): Promise<void>;
   addTracksToStation(stationId: string, tracks: Track[]): Promise<void>;
+  restoreSnapshot(snapshot: { stations: Station[]; tracks: Track[] }): Promise<void>;
   updateNowPlaying(nowPlaying: NowPlayingState | null): void;
   listenIn(targetUserId: string | null): void;
   publishToSharedRoom(customName?: string): Promise<string>;
@@ -139,6 +140,16 @@ function connectRoomWebSocket(
   };
 }
 
+function getTrackCanonicalKey(t: Partial<Track>): string {
+  if (t.ytId) return `yt:${t.ytId}`;
+  if (t.scUrl) return `sc:${t.scUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+  if (t.bcUrl) return `bc:${t.bcUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+  if (t.spotifyUrl) return `sp:${t.spotifyUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+  if (t.appleMusicUrl) return `am:${t.appleMusicUrl.split('?')[0].toLowerCase().replace(/\/$/, '')}`;
+  if (t.localBlobKey) return `local:${t.localBlobKey}`;
+  return `meta:${(t.artist || '').trim().toLowerCase()}|||${(t.title || '').trim().toLowerCase()}`;
+}
+
 /**
  * LocalRoomAdapter — 100% client-side personal room stored in IndexedDB (`/local`).
  * Starts clean so the user can build their own stations, while Ostalgie lives permanently at `/r/ostalgie`.
@@ -226,30 +237,73 @@ export class LocalRoomAdapter implements RoomAdapter {
 
   async addTracksToStation(stationId: string, incoming: Track[]): Promise<void> {
     const user = getUserProfile();
-    const byId = new Map(this.state.tracks.map(t => [t.id, t]));
+    const byId = new Map<string, Track>();
+    const byKey = new Map<string, Track>();
+
+    for (const t of this.state.tracks) {
+      byId.set(t.id, t);
+      const cKey = getTrackCanonicalKey(t);
+      byKey.set(cKey, t);
+      if (t.artist && t.title) {
+        byKey.set(`meta:${t.artist.trim().toLowerCase()}|||${t.title.trim().toLowerCase()}`, t);
+      }
+    }
+
+    const stationTrackIds = new Set<string>();
+    if (stationId !== 'all') {
+      const currentStation = this.state.stations.find(s => s.id === stationId);
+      for (const tid of currentStation?.trackIds || []) stationTrackIds.add(tid);
+    }
 
     for (const raw of incoming) {
-      const existing = byId.get(raw.id);
+      const cKey = getTrackCanonicalKey(raw);
+      const metaKey = raw.artist && raw.title
+        ? `meta:${raw.artist.trim().toLowerCase()}|||${raw.title.trim().toLowerCase()}`
+        : cKey;
+
+      const existing = (raw.id ? byId.get(raw.id) : undefined) || byKey.get(cKey) || byKey.get(metaKey);
+
       if (existing) {
         const stSet = new Set(existing.stationIds || []);
         if (stationId !== 'all') stSet.add(stationId);
+        for (const sid of raw.stationIds || []) stSet.add(sid);
+
         const uSet = new Set(existing.addedByUserIds || []);
         uSet.add(user.id);
-        byId.set(existing.id, {
+        for (const uid of raw.addedByUserIds || []) uSet.add(uid);
+
+        const updated: Track = {
           ...existing,
           ...raw,
+          id: existing.id,
+          thumbnail: raw.thumbnail || existing.thumbnail,
+          ytId: raw.ytId || existing.ytId,
+          scUrl: raw.scUrl || existing.scUrl,
+          bcUrl: raw.bcUrl || existing.bcUrl,
+          spotifyUrl: raw.spotifyUrl || existing.spotifyUrl,
+          appleMusicUrl: raw.appleMusicUrl || existing.appleMusicUrl,
+          localBlobKey: raw.localBlobKey || existing.localBlobKey,
           stationIds: Array.from(stSet),
           addedByUserIds: Array.from(uSet)
-        });
+        };
+        byId.set(existing.id, updated);
+        byKey.set(cKey, updated);
+        if (stationId !== 'all') stationTrackIds.add(existing.id);
       } else {
         const id = raw.id || crypto.randomUUID();
-        byId.set(id, {
+        const created: Track = {
           ...raw,
           id,
           stationIds: stationId !== 'all' ? [stationId] : [],
           addedByUserIds: [user.id],
-          addedAt: Date.now()
-        });
+          addedAt: raw.addedAt || Date.now()
+        };
+        byId.set(id, created);
+        byKey.set(cKey, created);
+        if (raw.artist && raw.title) {
+          byKey.set(`meta:${raw.artist.trim().toLowerCase()}|||${raw.title.trim().toLowerCase()}`, created);
+        }
+        if (stationId !== 'all') stationTrackIds.add(id);
       }
     }
 
@@ -257,11 +311,19 @@ export class LocalRoomAdapter implements RoomAdapter {
     if (stationId !== 'all') {
       this.state.stations = this.state.stations.map(s => {
         if (s.id !== stationId) return s;
-        const ids = new Set(s.trackIds || []);
-        for (const t of incoming) ids.add(t.id);
-        return { ...s, trackIds: Array.from(ids) };
+        return { ...s, trackIds: Array.from(stationTrackIds) };
       });
     }
+    await this.persistAndEmit();
+  }
+
+  async restoreSnapshot(snapshot: { stations: Station[]; tracks: Track[] }): Promise<void> {
+    this.state.stations = snapshot.stations.map(s => ({ ...s, trackIds: [...(s.trackIds || [])] }));
+    this.state.tracks = snapshot.tracks.map(t => ({
+      ...t,
+      stationIds: [...(t.stationIds || [])],
+      addedByUserIds: [...(t.addedByUserIds || [])]
+    }));
     await this.persistAndEmit();
   }
 
@@ -449,6 +511,23 @@ export class SharedRoomAdapter implements RoomAdapter {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stationId, tracks, user: getUserProfile() })
+    });
+    if (res.ok) {
+      this.state = (await res.json()) as RoomState;
+      this.emit();
+    }
+  }
+
+  async restoreSnapshot(snapshot: { stations: Station[]; tracks: Track[] }): Promise<void> {
+    if (this.isReadOnly) return;
+    const res = await fetch(`/api/rooms/${encodeURIComponent(this.roomId)}/restore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stations: snapshot.stations,
+        tracks: snapshot.tracks,
+        user: getUserProfile()
+      })
     });
     if (res.ok) {
       this.state = (await res.json()) as RoomState;

@@ -110,7 +110,13 @@
 
   <!-- Stations Panel -->
   <div class="sector-panel" id="sectorPanel">
-    <div class="sector-panel-title">Genre Stations</div>
+    <div class="sector-panel-header">
+      <div class="sector-panel-title">Stations</div>
+      <div class="sector-panel-actions">
+        <button class="station-hdr-btn" id="stationCreateBtn" title="Create New Station">+ Station</button>
+        <button class="station-hdr-btn import" id="stationImportBtn" title="Import Tracks to Station">Import</button>
+      </div>
+    </div>
     <input type="text" class="sector-search-input" id="sectorSearchInput" placeholder="Search stations..."
       autocomplete="off">
     <div class="sector-list" id="sectorList"></div>
@@ -153,11 +159,13 @@
       <div class="sr-body" id="srBody"></div>
     </div>
 
-    <!-- Room, Stations & Info Buttons -->
+    <!-- Room, Stations, Import & Info Buttons -->
     <button class="sector-btn" id="roomPanelBtn" title="Room"><span class="btn-icon room-btn-icon"></span>
       Room</button>
     <button class="sector-btn" id="sectorBtn" title="Manage Stations"><span class="btn-icon sector-btn-icon"></span>
       Stations</button>
+    <button class="sector-btn" id="importBtn" title="Import Music"><span class="btn-icon import-btn-icon"></span>
+      Import</button>
     <button class="info-btn" id="infoBtn" title="Info & Controls"></button>
   </div>
 

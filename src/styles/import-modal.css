@@ -1,0 +1,320 @@
+/* ── IMPORT MODAL & DROPZONE STYLING ────────────────── */
+
+.import-card {
+  max-width: 560px;
+  width: 100%;
+}
+
+.import-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.import-target-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.import-select {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  font: 500 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.import-custom-station-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  font: 500 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.import-custom-station-input:focus,
+.import-select:focus {
+  border-color: var(--accent);
+}
+
+.import-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1.5px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.import-tab-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font: 600 10px var(--font);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.import-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.import-tab-btn.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.import-textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  font: 11px var(--font);
+  line-height: 1.5;
+  color: var(--text-primary);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.import-textarea:focus {
+  border-color: var(--accent);
+}
+
+.import-dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.import-dropzone:hover,
+.import-dropzone.dragover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  transform: scale(0.995);
+}
+
+.import-dropzone-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--accent);
+}
+
+.import-dropzone-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.import-dropzone-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.import-files-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 90px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.import-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 10px;
+  color: var(--text-primary);
+}
+
+.import-file-chip-remove {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.import-file-chip-remove:hover {
+  color: #E53935;
+}
+
+/* ── PROGRESS BAR & STATUS ────────────────────────── */
+
+.import-progress-container {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.import-progress-container.active {
+  display: flex;
+}
+
+.import-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.import-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.import-status-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── FOOTER ACTIONS ───────────────────────────────── */
+
+.import-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.import-submit-btn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1.8px solid var(--border);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  box-shadow: var(--shadow-sm);
+  font: 600 11px var(--font);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.import-submit-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+.import-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.import-cancel-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: 500 11px var(--font);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.import-cancel-btn:hover {
+  background: var(--bg-elevated);
+}
+
+/* ── FLOATING UNDO TOAST ──────────────────────────── */
+
+.undo-toast {
+  position: fixed;
+  bottom: 86px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-elevated);
+  border: 1.8px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  font: 11px var(--font);
+  color: var(--text-primary);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+}
+
+.undo-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.undo-toast-btn {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 5px;
+  border: 1.2px solid var(--border);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font: 600 10px var(--font);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.undo-toast-btn:hover {
+  transform: scale(1.05);
+}

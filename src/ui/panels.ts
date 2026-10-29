@@ -1,4 +1,4 @@
-import { ICON_EXTERNAL_LINK, ICON_MUSIC, ICON_BROADCAST, ICON_NOTE_SM, ICON_USER_SM } from './icons';
+import { ICON_EXTERNAL_LINK, ICON_MUSIC, ICON_BROADCAST, ICON_NOTE_SM, ICON_USER_SM, ICON_EDIT, ICON_TRASH } from './icons';
 import { escapeHtml, standardizeCountry, getDisplayCountry, trackMap } from '../data/store';
 import { getTrackRecommendations } from '../data/recommendations';
 import { getTrackGenres } from '../data/genres';
@@ -8,7 +8,12 @@ import { Track, Cluster, Station } from '../types/index';
 export interface UIPanelsInitOptions {
   stations: () => Station[];
   currentStationId: () => string;
+  isReadOnly?: () => boolean;
   onSelectStation?: (sid: string) => void;
+  onCreateStation?: (name: string) => Promise<void> | void;
+  onRenameStation?: (sid: string, newName: string) => Promise<void> | void;
+  onDeleteStation?: (sid: string) => Promise<void> | void;
+  onOpenImport?: (preselectedStationId?: string) => void;
   onSelectTrack?: (track: Track) => void;
   onSearchChange?: (query: string) => void;
   onToggleAutopilot?: () => boolean;
@@ -50,6 +55,11 @@ class UIPanels {
 
   onSelectTrack: ((track: Track) => void) | null = null;
   onSelectStation: ((sid: string) => void) | null = null;
+  onCreateStation?: (name: string) => Promise<void> | void;
+  onRenameStation?: (sid: string, newName: string) => Promise<void> | void;
+  onDeleteStation?: (sid: string) => Promise<void> | void;
+  onOpenImport?: (preselectedStationId?: string) => void;
+  isReadOnly?: () => boolean;
   onToggleAutopilot?: () => boolean;
   onToggleBorders?: () => boolean;
   onToggleStarfield?: () => boolean;
@@ -59,6 +69,11 @@ class UIPanels {
   init(options: UIPanelsInitOptions): void {
     this.onSelectTrack = options.onSelectTrack || null;
     this.onSelectStation = options.onSelectStation || null;
+    this.onCreateStation = options.onCreateStation;
+    this.onRenameStation = options.onRenameStation;
+    this.onDeleteStation = options.onDeleteStation;
+    this.onOpenImport = options.onOpenImport;
+    this.isReadOnly = options.isReadOnly;
 
     const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
 
@@ -117,8 +132,61 @@ class UIPanels {
       this.renderStationList(stations(), (e.target as HTMLInputElement).value, currentStationId(), onSelectStation);
     });
 
-    this.sectorList?.addEventListener('click', e => {
-      const sid = (e.target as HTMLElement).closest<HTMLElement>('.sector-item')?.dataset.sid;
+    document.getElementById('stationCreateBtn')?.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (this.isReadOnly?.()) return;
+      sfx.play('click');
+      const name = window.prompt('Enter new station name:');
+      if (name && name.trim()) {
+        await this.onCreateStation?.(name.trim());
+      }
+    });
+
+    document.getElementById('stationImportBtn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      sfx.play('click');
+      this.onOpenImport?.(currentStationId());
+    });
+
+    document.getElementById('importBtn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      sfx.play('click');
+      this.onOpenImport?.(currentStationId());
+    });
+
+    this.sectorList?.addEventListener('click', async e => {
+      const target = e.target as HTMLElement;
+
+      const renameBtn = target.closest<HTMLElement>('.station-op-btn.rename');
+      if (renameBtn) {
+        e.stopPropagation();
+        if (this.isReadOnly?.()) return;
+        const sid = renameBtn.dataset.sid;
+        const currentName = renameBtn.dataset.sname || '';
+        if (sid && sid !== 'all') {
+          const newName = window.prompt(`Rename station '${currentName}':`, currentName);
+          if (newName && newName.trim() && newName.trim() !== currentName) {
+            await this.onRenameStation?.(sid, newName.trim());
+          }
+        }
+        return;
+      }
+
+      const deleteBtn = target.closest<HTMLElement>('.station-op-btn.delete');
+      if (deleteBtn) {
+        e.stopPropagation();
+        if (this.isReadOnly?.()) return;
+        const sid = deleteBtn.dataset.sid;
+        const currentName = deleteBtn.dataset.sname || '';
+        if (sid && sid !== 'all') {
+          if (window.confirm(`Delete station '${currentName}'? Tracks in other stations will be kept.`)) {
+            await this.onDeleteStation?.(sid);
+          }
+        }
+        return;
+      }
+
+      const sid = target.closest<HTMLElement>('.sector-item')?.dataset.sid;
       if (sid) {
         (this.onSelectStation || onSelectStation)?.(sid);
         this.sectorPanel?.classList.remove('open');
@@ -280,18 +348,32 @@ class UIPanels {
     if (!this.sectorList) return;
     const q = query.toLowerCase().trim();
 
+    const isReadOnly = this.isReadOnly ? this.isReadOnly() : false;
+    const createBtn = document.getElementById('stationCreateBtn');
+    const importBtn = document.getElementById('stationImportBtn');
+    if (createBtn) createBtn.style.display = isReadOnly ? 'none' : 'inline-flex';
+    if (importBtn) importBtn.style.display = isReadOnly ? 'none' : 'inline-flex';
+
     const filtered = q ? stations.filter(s => s.name && s.name.toLowerCase().includes(q)) : stations;
 
     this.sectorList.innerHTML = filtered.map(s => {
       const tCount = s.tracks ? s.tracks.length : (s.trackCount || 0);
       const aCount = s.artistCount || (s.tracks ? new Set(s.tracks.map(t => t.artist.toLowerCase())).size : 0);
       const activeClass = s.id === currentStationId ? ' active' : '';
+      const canManage = !isReadOnly && s.id !== 'all';
+      const opsHtml = canManage
+        ? `<div class="sector-item-ops">
+            <button class="station-op-btn rename" data-sid="${s.id}" data-sname="${escapeHtml(s.name)}" title="Rename Station">${ICON_EDIT}</button>
+            <button class="station-op-btn delete" data-sid="${s.id}" data-sname="${escapeHtml(s.name)}" title="Delete Station">${ICON_TRASH}</button>
+           </div>`
+        : '';
 
       return `
         <div class="sector-item${activeClass}" data-sid="${s.id}">
           <div class="sector-item-top">
             <div class="sector-item-icon">${ICON_BROADCAST}</div>
-            <span class="sector-item-name">${s.name}</span>
+            <span class="sector-item-name">${escapeHtml(s.name)}</span>
+            ${opsHtml}
           </div>
           <div class="sector-item-bottom">
             <div class="sector-item-badges">

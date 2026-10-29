@@ -268,13 +268,110 @@
   pointer-events: auto;
 }
 
+.sector-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
 .sector-panel-title {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.sector-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.station-hdr-btn {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  font: 600 10px var(--font);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s, transform 0.1s, color 0.15s;
+}
+
+.station-hdr-btn:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  transform: translate(-1px, -1px);
+}
+
+.station-hdr-btn.import {
+  background: var(--accent-dim);
+}
+
+.station-hdr-btn.import:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.sector-item-ops {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.sector-item:hover .sector-item-ops {
+  opacity: 1;
+}
+
+.station-op-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 0;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.station-op-btn:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  transform: scale(1.08);
+}
+
+.station-op-btn.delete:hover {
+  background: #E53935;
+  color: #FFFDF9;
+}
+
+.station-rename-input {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  font: 600 11px var(--font);
+  color: var(--text-primary);
+  outline: none;
 }
 
 .sector-search-input {

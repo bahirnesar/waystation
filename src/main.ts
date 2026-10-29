@@ -11,6 +11,7 @@ import { player } from './audio/player';
 import { sfx } from './audio/sfx';
 import { panels } from './ui/panels';
 import { landing } from './ui/landing';
+import { importModal } from './ui/import-modal';
 import { initIcons } from './ui/icons';
 import { RoomState, Track } from './types/index';
 
@@ -160,6 +161,7 @@ controls.init({
   onCloseAllPanels: () => {
     panels.closeAllPanels();
     landing.close();
+    importModal.close();
   },
   onToggleBorders: () => panels.toggleBorders(),
   onToggleStarfield: () => panels.toggleStarfield(),
@@ -196,7 +198,27 @@ function switchToStation(sid: string): void {
 panels.init({
   stations: () => stations,
   currentStationId: () => state.currentStationId,
+  isReadOnly: () => Boolean(activeAdapter?.isReadOnly || state.isReadOnly),
   onSelectStation: switchToStation,
+  onCreateStation: async (name: string) => {
+    if (!activeAdapter || activeAdapter.isReadOnly) return;
+    const st = await activeAdapter.createStation(name);
+    switchToStation(st.id);
+  },
+  onRenameStation: async (sid: string, newName: string) => {
+    if (!activeAdapter || activeAdapter.isReadOnly) return;
+    await activeAdapter.renameStation(sid, newName);
+  },
+  onDeleteStation: async (sid: string) => {
+    if (!activeAdapter || activeAdapter.isReadOnly) return;
+    await activeAdapter.deleteStation(sid);
+    if (state.currentStationId === sid) {
+      switchToStation('all');
+    }
+  },
+  onOpenImport: (preselectedStationId?: string) => {
+    importModal.open(preselectedStationId);
+  },
   onSelectTrack: selectTrack,
   onSearchChange: (query: string) => {
     state.searchQuery = query;
@@ -221,6 +243,16 @@ panels.init({
     return sfx.enabled;
   },
   onResetCam: () => controls.resetCamera()
+});
+
+// 7. Setup Import Modal
+importModal.init({
+  getStations: () => stations,
+  getCurrentStationId: () => state.currentStationId,
+  getActiveAdapter: () => activeAdapter,
+  onImportComplete: (targetStationId: string) => {
+    switchToStation(targetStationId);
+  }
 });
 
 // 7. Room Routing & Adapter Lifecycle
