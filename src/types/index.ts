@@ -149,8 +149,3 @@ export interface TrackRecommendations {
   genreSections: GenreRecommendationSection[];
   locationTracks: Track[];
 }
-
-export interface RangeChangeEvent {
-  rangeYearL: number;
-  rangeYearR: number;
-}

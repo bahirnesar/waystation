@@ -19,8 +19,10 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three']
+        manualChunks(id) {
+          if (id.includes('node_modules/three')) {
+            return 'three';
+          }
         }
       }
     }

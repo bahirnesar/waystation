@@ -1,9 +1,10 @@
 import { RoomAdapter } from '../data/room-adapter';
 import { getUserProfile } from '../data/identity';
 import { saveLocalAudioBlob } from '../data/local-blobs';
+import { escapeHtml } from '../data/store';
 import { sfx } from '../audio/sfx';
 import { Station, Track } from '../types/index';
-import { ICON_UPLOAD, escapeHtml } from './icons-helper';
+import { ICON_UPLOAD } from './icons';
 
 export interface ImportModalInitOptions {
   getStations: () => Station[];
