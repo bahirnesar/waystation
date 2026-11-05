@@ -237,7 +237,7 @@ class UIPanels {
       }
     });
 
-    document.getElementById('infoBtn')?.addEventListener('click', () => {
+    (document.getElementById('settingsBtn') ?? document.getElementById('infoBtn'))?.addEventListener('click', () => {
       sfx.play('click');
       this.infoPanel?.classList.toggle('open');
     });
